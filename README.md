@@ -2,6 +2,8 @@
 
 *Author:* ZHANG Weiyi <dochang@gmail.com><br>
 
+[![wercker status](https://app.wercker.com/status/7649d473775bd7832c7754b62f859897/m "wercker status")](https://app.wercker.com/project/bykey/7649d473775bd7832c7754b62f859897)
+
 Multiple Backends for URL package.
 
 This package provides several backends for `url-retrieve` &
