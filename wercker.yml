@@ -1,0 +1,18 @@
+box: python:2
+
+build:
+  steps:
+    - script:
+        name: Install packages
+        code: |
+          export PATH=${HOME}/.cask/bin:${PATH}
+          apt-get update
+          apt-get --yes install emacs-nox curl
+          pip install httpie
+          curl --fail --silent --show-error --location https://github.com/cask/cask/raw/master/go | python
+          cask install
+    - script:
+        name: Test
+        code: |
+          export PATH=${HOME}/.cask/bin:${PATH}
+          make test
