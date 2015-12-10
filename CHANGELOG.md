@@ -2,6 +2,8 @@
 
 ## Unreleased ##
 
+  - Add install instruction
+
 ## 0.0.2 - 2015-12-06 ##
 
   - Fix typo

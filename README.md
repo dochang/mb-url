@@ -18,6 +18,19 @@ The motivation of this package is I can't connect HTTPS url behind proxy
 [msg00756]: https://lists.gnu.org/archive/html/help-gnu-emacs/2015-08/msg00756.html
 [#10]: http://debbugs.gnu.org/cgi/bugreport.cgi?bug=10
 
+## Installation
+
+`mb-url` is available on MELPA and el-get.
+
+To install `mb-url` from git repository, clone the repo, then add the repo
+dir into `load-path`.
+
+`mb-url` depends on `cl-lib`;  The test code also depends on `s`.
+
+NOTE: the test code requires GNU Emacs 24.4 and above because it uses the
+new `nadvice` package.  `mb-url` may support GNU Emacs 24.3 and below but
+it's not tested with those versions.
+
 ## Backends
 
 Currently only support `url-http`.
