@@ -1,4 +1,4 @@
-(define-package "mb-url" "0.0.2"
+(define-package "mb-url" "0.0.3"
   "Multiple Backends for Emacs URL package."
   '((cl-lib "0"))
   :keywords '("url")
