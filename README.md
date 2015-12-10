@@ -22,7 +22,10 @@ The motivation of this package is I can't connect HTTPS url behind proxy
 
 ## Installation
 
-`mb-url` is available on MELPA and el-get.
+`mb-url` is available on [MELPA] and [el-get].
+
+[MELPA]: https://melpa.org/
+[el-get]: https://github.com/dimitri/el-get
 
 To install `mb-url` from git repository, clone the repo, then add the repo
 dir into `load-path`.

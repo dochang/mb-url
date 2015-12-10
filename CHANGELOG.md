@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+  - Add links to MELPA & el-get.
+
 ## [0.0.3] - 2015-12-10 ##
 
 ### Changed ###
