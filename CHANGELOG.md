@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.0.4] - 2016-04-14 ##
+
 ### Changed ###
 
   - Fix typo in the change log.
@@ -34,6 +36,7 @@
   - Initial release
 
 [Unreleased]: https://github.com/dochang/mb-url/compare/v0.0.3...HEAD
+[0.0.4]: https://github.com/dochang/mb-url/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/dochang/mb-url/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/dochang/mb-url/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/dochang/mb-url/compare/v0.0.0...v0.0.1
