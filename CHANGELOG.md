@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.0.6] - 2016-05-08 ##
+
 ### Fixed ###
 
   - Fix version number.
@@ -45,7 +47,8 @@
 
   - Initial release
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.0.5...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.0.6...HEAD
+[0.0.6]: https://github.com/dochang/mb-url/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/dochang/mb-url/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/dochang/mb-url/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/dochang/mb-url/compare/0.0.2...0.0.3
