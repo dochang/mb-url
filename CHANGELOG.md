@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Fixed ###
+
+  - Fix version number.
+
 ## [0.0.5] - 2016-04-14 ##
 
 ### Changed ###
