@@ -1,0 +1,28 @@
+version = '0.0.6'
+
+[[files."CHANGELOG.md"]]
+search = '''
+## [Unreleased] ##
+'''
+replace = '''
+## [Unreleased] ##
+
+## [{{new_version}}] - {{utcnow | strftime('%Y-%m-%d')}} ##
+'''
+
+[[files."CHANGELOG.md"]]
+search = '''
+[Unreleased]: https://github.com/dochang/mb-url/compare/{{old_version}}...HEAD
+'''
+replace = '''
+[Unreleased]: https://github.com/dochang/mb-url/compare/{{new_version}}...HEAD
+[{{new_version}}]: https://github.com/dochang/mb-url/compare/{{old_version}}...{{new_version}}
+'''
+
+[[files."mb-url-pkg.el"]]
+search = '{{old_version}}'
+replace = '{{new_version}}'
+
+[[files."Cask"]]
+search = '{{old_version}}'
+replace = '{{new_version}}'
