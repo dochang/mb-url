@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.0.8] - 2016-07-01 ##
+
 ### Added ###
 
   - Test on travis-ci
@@ -57,7 +59,8 @@
 
   - Initial release
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.0.7...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.0.8...HEAD
+[0.0.8]: https://github.com/dochang/mb-url/compare/0.0.7...0.0.8
 [0.0.7]: https://github.com/dochang/mb-url/compare/0.0.6...0.0.7
 [0.0.6]: https://github.com/dochang/mb-url/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/dochang/mb-url/compare/0.0.4...0.0.5
