@@ -25,7 +25,7 @@
 
 ;; [![MELPA](http://melpa.org/packages/mb-url-badge.svg)](http://melpa.org/#/mb-url)
 ;; [![MELPA Stable](http://stable.melpa.org/packages/mb-url-badge.svg)](http://stable.melpa.org/#/mb-url)
-;; [![wercker status](https://app.wercker.com/status/7649d473775bd7832c7754b62f859897/m "wercker status")](https://app.wercker.com/project/bykey/7649d473775bd7832c7754b62f859897)
+;; [![Build Status](https://travis-ci.org/dochang/mb-url.svg?branch=master)](https://travis-ci.org/dochang/mb-url)
 ;;
 ;; Multiple Backends for URL package.
 ;;
