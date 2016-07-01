@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+  - Test on travis-ci
+
 ## [0.0.7] - 2016-06-02 ##
 
 ### Added ###
