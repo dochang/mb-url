@@ -4,6 +4,9 @@ VIRTUAL_EMACS = ${CASK} exec ${EMACS}
 
 all:
 
+install:
+	${CASK} install
+
 test:
 	${VIRTUAL_EMACS} -Q -batch \
 		-L . -L tests -l tests/test-mb-url.el \
