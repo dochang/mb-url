@@ -89,7 +89,6 @@ This function deletes the first block (from proxy)."
          ,@docstring
          (let* ((url-request-method (or url-request-method "GET"))
                 (buffer-name (funcall ,buffer-name-function url))
-                (retry-buffer (generate-new-buffer buffer-name))
                 (args (funcall ,command-list-function url))
                 (proc (let ((process-connection-type nil))
                         (apply 'start-process buffer-name
