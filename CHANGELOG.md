@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+  - Test for Emacs 25.1
+
 ## [0.0.9] - 2016-07-24 ##
 
 ### Added ###
