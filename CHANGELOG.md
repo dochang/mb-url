@@ -6,6 +6,10 @@
 
   - Test for Emacs 25.1
 
+### Fixed ###
+
+  - Fix for Emacs 25
+
 ## [0.0.9] - 2016-07-24 ##
 
 ### Added ###

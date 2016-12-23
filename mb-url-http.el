@@ -78,6 +78,7 @@ This function deletes the first block (from proxy)."
 ;;;###autoload
 (cl-defmacro define-mb-url-http-backend (backend-name &rest body)
   (let ((fn-name (intern (format "mb-url-http-%s" backend-name)))
+        (gateway-method (and (>= emacs-major-version 25) '(gateway-method)))
         (docstring '()))
     (when (stringp (car body))
       (setq docstring (list (car body))
@@ -85,7 +86,7 @@ This function deletes the first block (from proxy)."
     (cl-destructuring-bind
         (&key buffer-name-function command-list-function sentinel) body
       (setq sentinel (or sentinel ''mb-url-http-sentinel))
-      `(defun ,fn-name (url callback cbargs &optional retry-buffer)
+      `(defun ,fn-name (url callback cbargs &optional retry-buffer ,@gateway-method)
          ,@docstring
          (let* ((url-request-method (or url-request-method "GET"))
                 (buffer-name (funcall ,buffer-name-function url))
