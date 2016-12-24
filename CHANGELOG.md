@@ -9,6 +9,7 @@
 ### Changed ###
 
   - Naming convention
+  - Rewrite test code
 
 ### Fixed ###
 
