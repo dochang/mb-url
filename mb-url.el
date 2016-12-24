@@ -106,10 +106,18 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defgroup mb-url ()
   "Multiple Backends for URL package."
   :prefix "mb-url-"
   :group 'url)
+
+(defmacro mb-url-with-gensyms (symbols &rest body)
+  "Bind SYMBOLS to unique temporary symbols then execute BODY in the context."
+  (declare (indent 1))
+  `(let ,(mapcar (lambda (sym) `(,sym (cl-gensym))) symbols)
+     ,@body))
 
 (provide 'mb-url)
 
