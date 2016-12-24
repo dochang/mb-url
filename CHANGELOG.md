@@ -6,6 +6,10 @@
 
   - Test for Emacs 25.1
 
+### Changed ###
+
+  - Naming convention
+
 ### Fixed ###
 
   - Fix for Emacs 25
