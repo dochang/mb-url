@@ -76,7 +76,7 @@ This function deletes the first block (from proxy)."
         (url-http-end-of-document-sentinel proc evt)))))
 
 ;;;###autoload
-(cl-defmacro mb-url-define-http-backend (backend-name &rest body)
+(defmacro mb-url-define-http-backend (backend-name &rest body)
   (declare (indent 1))
   (let ((fn-name (intern (format "mb-url-http-%s" backend-name)))
         (gateway-method (and (>= emacs-major-version 25) '(gateway-method)))
