@@ -79,7 +79,7 @@ This function deletes the first block (from proxy)."
 (defmacro mb-url-define-http-backend (backend-name &rest body)
   (declare (indent 1))
   (mb-url-with-gensyms (url callback cbargs retry-buffer
-                            buffer-name args proc)
+                            buffer-name args proc evt)
     (let ((fn-name (intern (format "mb-url-http-%s" backend-name)))
           (gateway-method (and (>= emacs-major-version 25) (list (cl-gensym))))
           (docstring '()))
@@ -149,7 +149,12 @@ This function deletes the first block (from proxy)."
                      url-http-no-retry ,retry-buffer
                      url-http-connection-opened nil
                      url-http-proxy url-using-proxy))
-             (set-process-sentinel ,proc ,sentinel)
+             (set-process-sentinel ,proc
+                                   (lambda (,proc ,evt)
+                                     (unwind-protect
+                                         (funcall ,sentinel ,proc ,evt)
+                                       (when (process-live-p ,proc)
+                                         (kill-buffer (process-buffer ,proc))))))
              (process-buffer ,proc)))))))
 
 
