@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.1.0] - 2016-12-25 ##
+
 ### Added ###
 
   - Test for Emacs 25.1
@@ -78,7 +80,8 @@
 
   - Initial release
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.0.9...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/dochang/mb-url/compare/0.0.9...0.1.0
 [0.0.9]: https://github.com/dochang/mb-url/compare/0.0.8...0.0.9
 [0.0.8]: https://github.com/dochang/mb-url/compare/0.0.7...0.0.8
 [0.0.7]: https://github.com/dochang/mb-url/compare/0.0.6...0.0.7
