@@ -28,7 +28,10 @@ before_install:
   - export PATH="$CASK_DIR/bin:$PATH"
 
 install:
-  - pip install --user httpie
+  # We have to install and upgrade pyOpenSSL because of [1]
+  #
+  # https://github.com/requests/requests/issues/4246#issuecomment-356336986
+  - pip install --user --upgrade httpie pyOpenSSL
   - make install
 
 script:
