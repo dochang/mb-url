@@ -97,7 +97,7 @@ This function deletes the first block (from proxy)."
                   (,proc (let ((process-connection-type nil))
                            (apply 'start-process ,buffer-name
                                   (generate-new-buffer ,buffer-name) ,args))))
-             (when url-request-data
+             (unless (mb-url-string-empty-p url-request-data)
                (set-process-coding-system ,proc 'binary 'binary)
                (process-send-string ,proc url-request-data))
              (process-send-eof ,proc)
@@ -169,7 +169,9 @@ This function deletes the first block (from proxy)."
     ,@(if (string= "HEAD" url-request-method)
           (list "--head")
         (list "--request" url-request-method))
-    ,@(if url-request-data (list "--data-binary" "@-") '())
+    ,@(if (mb-url-string-empty-p url-request-data)
+          '()
+        (list "--data-binary" "@-"))
     ,@(apply 'append
              (mapcar 'mb-url-http--curl-pair-to-args
                      url-request-extra-headers))

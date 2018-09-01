@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Fixed ###
+
+  - Do not post data for curl even if the data is an empty string
+
 ## [0.1.0] - 2016-12-25 ##
 
 ### Added ###

@@ -1,6 +1,6 @@
 ;;; mb-url.el --- Multiple Backends for Emacs URL package
 
-;; Copyright (C) 2015 ZHANG Weiyi
+;; Copyright (C) 2015, 2016, 2018 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
 
@@ -118,6 +118,11 @@
   (declare (indent 1))
   `(let ,(mapcar (lambda (sym) `(,sym (cl-gensym))) symbols)
      ,@body))
+
+(defun mb-url-string-empty-p (string)
+  "Check whether STRING is nil or empty."
+  (or (null string)
+      (string= string "")))
 
 (provide 'mb-url)
 
