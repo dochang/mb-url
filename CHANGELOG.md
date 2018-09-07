@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.2.1] - 2018-09-07 ##
+
 ### Changed ###
 
   - Make ERT easy to debug
@@ -90,7 +92,8 @@
 
   - Initial release
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/dochang/mb-url/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/dochang/mb-url/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/dochang/mb-url/compare/0.0.9...0.1.0
 [0.0.9]: https://github.com/dochang/mb-url/compare/0.0.8...0.0.9
