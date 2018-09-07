@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+  - Make ERT easy to debug
+
 ## [0.2.0] - 2018-09-01 ##
 
 ### Fixed ###

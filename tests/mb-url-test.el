@@ -1,6 +1,6 @@
 ;;; mb-url-test.el --- Tests for mb-url
 
-;; Copyright (C) 2015 ZHANG Weiyi
+;; Copyright (C) 2015, 2016, 2018 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
 
@@ -37,6 +37,9 @@
 
 (require 'mb-url)
 (require 'mb-url-http)
+
+;; Do not truncate the backtrace.  This makes ERT easy to debug.
+(setq ert-batch-backtrace-right-margin 256)
 
 (cl-defstruct (mb-url-test-response
                (:constructor mb-url-test-make-response)
