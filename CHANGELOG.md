@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+  - Completely rewrite for url-http backends
+
 ## [0.2.1] - 2018-09-07 ##
 
 ### Changed ###
