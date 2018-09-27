@@ -112,32 +112,30 @@ Access-Control-Allow-Credentials: true
         (should (string= (assoc-default 'url (mb-url-test-response-json resp))
                          "https://httpbin.org/get"))))))
 
-(defmacro mb-url-test-define-http-backend-test (backend)
-  (mb-url-with-gensyms (buffer resp json)
-    (let ((function-name (intern (format "mb-url-http-%s" backend))))
-      `(ert-deftest ,(intern (format "mb-url-test-050-http-%s-GET" backend)) ()
-         ,(format "Test GET for %s" function-name)
-         (unwind-protect
-             (progn
-               (advice-add 'url-http :override ',function-name)
-               (let ((,buffer (url-retrieve-synchronously
-                               "https://httpbin.org/get?foo=bar" t t)))
-                 (with-current-buffer ,buffer
-                   (goto-char (point-min))
-                   (let* ((,resp (mb-url-test-parse-response))
-                          (,json (mb-url-test-response-json ,resp)))
-                     (should (= (mb-url-test-response-status-code ,resp) 200))
-                     (should (string=
-                              (mb-url-test-response-header "Content-Type" ,resp)
-                              "application/json"))
-                     (should (string=
-                              (assoc-default 'foo (assoc-default 'args ,json))
-                              "bar"))))))
-           (advice-remove 'url-http ',function-name))))))
-
-(mb-url-test-define-http-backend-test "curl")
-
-(mb-url-test-define-http-backend-test "httpie")
+(ert-deftest mb-url-test-050-http ()
+  (unwind-protect
+      (progn
+        (advice-add 'url-http :around 'mb-url-http-around-advice)
+        (mapc (lambda (backend)
+                (let* ((mb-url-http-backend backend)
+                       (buffer (url-retrieve-synchronously
+                                "https://httpbin.org/get?foo=bar" t t)))
+                  (with-current-buffer buffer
+                    (goto-char (point-min))
+                    (let* ((resp (mb-url-test-parse-response))
+                           (json (mb-url-test-response-json resp)))
+                      (should (= (mb-url-test-response-status-code resp) 200))
+                      (should (string=
+                               (mb-url-test-response-header "Content-Type" resp)
+                               "application/json"))
+                      (should (string=
+                               (assoc-default 'foo (assoc-default 'args json))
+                               "bar"))))))
+              (list 'mb-url-http-curl
+                    #'mb-url-http-curl
+                    'mb-url-http-httpie
+                    #'mb-url-http-httpie)))
+    (advice-remove 'url-http 'mb-url-http-around-advice)))
 
 (provide 'mb-url-test)
 

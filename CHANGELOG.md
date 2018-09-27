@@ -5,6 +5,7 @@
 ### Changed ###
 
   - Completely rewrite for url-http backends
+  - New test code
 
 ## [0.2.1] - 2018-09-07 ##
 
