@@ -40,28 +40,37 @@ it's not tested with those versions.
 
 Currently only support `url-http`.
 
-All backend functions have the same type signature of `url-http`.  Any
-backend can be used as an override advice of `url-http`.
+### `url-http`
+
+Install `mb-url-http-around-advice` to use `mb-url-http` backends.
+
+```elisp
+(advice-add 'url-http :around 'mb-url-http-around-advice)
+```
+
+All backend functions receive `(name url buffer default-sentinel)`, return a
+process.
+
+`mb-url-http-backend` indicates the current backend.  If the backend is
+`nil`, which means no backend, `url-http` will be called.
 
 E.g.,
 
 ```elisp
-(advice-add 'url-http :override 'mb-url-http-curl)
+(setq mb-url-http-backend 'mb-url-http-curl)
 ```
 
-### `url-http`
+#### [cURL][]
 
-#### [Curl][]
-
-[Curl]: http://curl.haxx.se/
+[cURL]: http://curl.haxx.se/
 
 ##### `mb-url-http-curl`
 
-Advice for `url-http`.
+cURL backend for `url-http`.
 
 ##### `mb-url-http-curl-command`
 
-Executable for Curl command.
+Executable for cURL command.
 
 #### [HTTPie][]
 
@@ -69,7 +78,7 @@ Executable for Curl command.
 
 ##### `mb-url-http-httpie`
 
-Advice for `url-http`.
+HTTPie backend for `url-http`.
 
 ##### `mb-url-http-httpie-command`
 
