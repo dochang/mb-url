@@ -112,6 +112,15 @@ Access-Control-Allow-Credentials: true
         (should (string= (assoc-default 'url (mb-url-test-response-json resp))
                          "https://httpbin.org/get"))))))
 
+(ert-deftest mb-url-test-010-header-field-to-argument ()
+  (mapc (lambda (case)
+          (let ((field (car case))
+                (expected (cdr case)))
+            (string= (mb-url-http-header-field-to-argument field) expected)))
+        '((("X-Foo1" . "bar") . "X-Foo1:bar")
+          (("X-Foo2" . "") . "X-Foo2;")
+          (("X-Foo3" . nil) . "X-Foo3"))))
+
 (ert-deftest mb-url-test-050-http ()
   (unwind-protect
       (progn

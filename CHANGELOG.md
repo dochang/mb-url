@@ -2,6 +2,11 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+  - Support set empty headers
+  - Support unset headers
+
 ## [0.3.0] - 2018-09-27 ##
 
 ### Changed ###

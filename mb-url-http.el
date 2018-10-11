@@ -80,6 +80,16 @@ This function deletes the first block (from proxy)."
             (replace-match "\n")))
         (url-http-end-of-document-sentinel proc evt)))))
 
+(defun mb-url-http-header-field-to-argument (header)
+  (let ((name (car header))
+        (value (cdr header)))
+    (cond ((null value)
+           (format "%s:" name))
+          ((string-match-p "\\`[ \t\n\r]*\\'" value)
+           (format "%s;" name))
+          (t
+           (format "%s:%s" name value)))))
+
 (defun mb-url-http-process-send-url-request-data (proc)
   (unless (mb-url-string-empty-p url-request-data)
     (set-process-coding-system proc 'binary 'binary)
@@ -165,9 +175,6 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
          url callback cbargs retry-buffer rest-args))
 
 
-(defun mb-url-http--curl-pair-to-args (pair)
-  (list "--header" (format "%s: %s" (car pair) (cdr pair))))
-
 (defcustom mb-url-http-curl-command "curl"
   "Executable for Curl command."
   :group 'mb-url)
@@ -182,8 +189,9 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
           '()
         (list "--data-binary" "@-"))
     ,@(apply #'append
-             (mapcar #'mb-url-http--curl-pair-to-args
-                     url-request-extra-headers))
+             (mapcar (lambda (arg) (list "--header" arg))
+                     (mapcar #'mb-url-http-header-field-to-argument
+                             url-request-extra-headers)))
     ,(url-recreate-url url)))
 
 (defun mb-url-http-sentinel--curl (proc evt)
@@ -208,9 +216,6 @@ first."
     proc))
 
 
-(defun mb-url-http--httpie-pair-to-args (pair)
-  (format "%s:%s" (car pair) (cdr pair)))
-
 (defcustom mb-url-http-httpie-command "http"
   "Executable for HTTPie command."
   :group 'mb-url)
@@ -219,7 +224,7 @@ first."
   `(,mb-url-http-httpie-command
     "--print" "hb" "--pretty" "none"
     ,url-request-method ,(url-recreate-url url)
-    ,@(mapcar #'mb-url-http--httpie-pair-to-args
+    ,@(mapcar #'mb-url-http-header-field-to-argument
               url-request-extra-headers)))
 
 ;;;###autoload
