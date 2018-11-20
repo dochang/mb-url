@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+  - Use ert-runner to test
+
 ## [0.3.1] - 2018-10-11 ##
 
 ### Changed ###

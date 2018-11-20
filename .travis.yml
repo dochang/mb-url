@@ -34,7 +34,7 @@ install:
   #
   # https://github.com/requests/requests/issues/4246#issuecomment-356336986
   - pip install --upgrade httpie pyOpenSSL
-  - make install
+  - cask install
 
 script:
-  - make test
+  - cask exec ert-runner
