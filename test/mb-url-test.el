@@ -143,7 +143,13 @@ Access-Control-Allow-Credentials: true
               (list 'mb-url-http-curl
                     #'mb-url-http-curl
                     'mb-url-http-httpie
-                    #'mb-url-http-httpie)))
+                    #'mb-url-http-httpie))
+        (mapc (lambda (backend)
+                (let ((mb-url-http-backend backend))
+                  (should-error (url-retrieve-synchronously
+                                 "https://httpbin.org/get?foo=bar" t t))))
+              (list 'mb-url-test--foobar
+                    #'mb-url-test--foobar)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
 (provide 'mb-url-test)

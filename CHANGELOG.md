@@ -6,6 +6,7 @@
 
   - Use ert-runner to test
   - Fallback to `url-http` only if `mb-url-http-backend` is nil
+  - Add more test cases
 
 ## [0.3.1] - 2018-10-11 ##
 
