@@ -1,5 +1,8 @@
 language: python
 
+services:
+  - docker
+
 env:
   global:
     - EVM_DIR="$HOME/.evm"
@@ -32,5 +35,8 @@ install:
   - pip install --upgrade httpie pyOpenSSL
   - cask install
 
+before_script:
+  - docker run --detach --name httpbin --publish 80:80 kennethreitz/httpbin
+
 script:
-  - cask exec ert-runner
+  - cask exec ert-runner --load test/travis-helper.el

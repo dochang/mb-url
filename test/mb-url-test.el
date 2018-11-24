@@ -127,8 +127,8 @@ Access-Control-Allow-Credentials: true
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (buffer (url-retrieve-synchronously
-                                "https://httpbin.org/get?foo=bar" t t)))
+                       (url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix))
+                       (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer
                     (goto-char (point-min))
                     (let* ((resp (mb-url-test-parse-response))
@@ -145,9 +145,9 @@ Access-Control-Allow-Credentials: true
                     'mb-url-http-httpie
                     #'mb-url-http-httpie))
         (mapc (lambda (backend)
-                (let ((mb-url-http-backend backend))
-                  (should-error (url-retrieve-synchronously
-                                 "https://httpbin.org/get?foo=bar" t t))))
+                (let ((mb-url-http-backend backend)
+                      (url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix)))
+                  (should-error (url-retrieve-synchronously url t t))))
               (list 'mb-url-test--foobar
                     #'mb-url-test--foobar)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))

@@ -1,4 +1,4 @@
-;;; test-helper.el --- Helpers for mb-url-test.el
+;;; travis-helper.el --- Travis helpers for mb-url-test.el
 
 ;; Copyright (C) 2018 ZHANG Weiyi
 
@@ -19,6 +19,6 @@
 
 ;;; Code:
 
-(defvar mb-url-test--httpbin-prefix "https://httpbin.org")
+(setq mb-url-test--httpbin-prefix "http://localhost")
 
-;;; test-helper.el ends here
+;;; travis-helper.el ends here
