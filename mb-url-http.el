@@ -171,7 +171,7 @@ FN is the original function.
 URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   ;; `rest-args' is required because `url-http' adds an argument called
   ;; `gateway-method' since Emacs 25.
-  (apply (if (functionp mb-url-http-backend) #'mb-url-http fn)
+  (apply (if mb-url-http-backend #'mb-url-http fn)
          url callback cbargs retry-buffer rest-args))
 
 
