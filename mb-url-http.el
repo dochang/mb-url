@@ -174,6 +174,14 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   (apply (if mb-url-http-backend #'mb-url-http fn)
          url callback cbargs retry-buffer rest-args))
 
+(defun mb-url-http-make-pipe-process (name buffer command &optional sentinel)
+  "Make a pipe process."
+  (let ((proc (let ((process-connection-type nil))
+                (apply #'start-process name buffer command))))
+    (set-process-sentinel proc (or sentinel #'mb-url-http-sentinel))
+    (mb-url-http-process-send-url-request-data proc)
+    proc))
+
 
 (defcustom mb-url-http-curl-command "curl"
   "Executable for Curl command."
@@ -208,12 +216,10 @@ first."
 ;;;###autoload
 (defun mb-url-http-curl (name url buffer default-sentinel)
   "cURL backend for `mb-url-http'."
-  (let ((proc (let ((process-connection-type nil))
-                (apply #'start-process name buffer
-                       (mb-url-http--curl-command-list url)))))
-    (set-process-sentinel proc #'mb-url-http-sentinel--curl)
-    (mb-url-http-process-send-url-request-data proc)
-    proc))
+  (mb-url-http-make-pipe-process
+   name buffer
+   (mb-url-http--curl-command-list url)
+   #'mb-url-http-sentinel--curl))
 
 
 (defcustom mb-url-http-httpie-command "http"
@@ -230,12 +236,10 @@ first."
 ;;;###autoload
 (defun mb-url-http-httpie (name url buffer default-sentinel)
   "HTTPie backend for `mb-url-http'."
-  (let ((proc (let ((process-connection-type nil))
-                (apply #'start-process name buffer
-                       (mb-url-http--httpie-command-list url)))))
-    (set-process-sentinel proc default-sentinel)
-    (mb-url-http-process-send-url-request-data proc)
-    proc))
+  (mb-url-http-make-pipe-process
+   name buffer
+   (mb-url-http--httpie-command-list url)
+   default-sentinel))
 
 (provide 'mb-url-http)
 
