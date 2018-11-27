@@ -37,6 +37,7 @@ install:
 
 before_script:
   - docker run --detach --name httpbin --publish 80:80 kennethreitz/httpbin
+  - sleep 15
 
 script:
   - cask exec ert-runner --load test/travis-helper.el
