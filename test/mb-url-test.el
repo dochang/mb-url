@@ -50,7 +50,8 @@
   (cdr (assoc-string field-name (mb-url-test-response-headers response) t)))
 
 (defun mb-url-test-parse-response (&optional buffer)
-  (setq buffer (current-buffer))
+  (unless buffer
+    (setq buffer (current-buffer)))
   (let ((resp (mb-url-test-make-response)))
     (with-current-buffer buffer
       (save-excursion
