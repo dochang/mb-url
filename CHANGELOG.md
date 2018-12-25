@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.4.0] - 2018-12-25 ##
+
 ### Added ###
 
   - `mb-url-http-curl-switches`
@@ -123,7 +125,8 @@
 
   - Initial release
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.3.1...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/dochang/mb-url/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/dochang/mb-url/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/dochang/mb-url/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/dochang/mb-url/compare/0.2.0...0.2.1
