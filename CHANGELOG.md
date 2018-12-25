@@ -7,6 +7,7 @@
   - Use ert-runner to test
   - Fallback to `url-http` only if `mb-url-http-backend` is nil
   - Add more test cases
+  - Rename variables to follow Emacs conventions
 
 ### Deprecated ###
 

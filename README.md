@@ -74,9 +74,9 @@ E.g.,
 
 cURL backend for `url-http`.
 
-##### `mb-url-http-curl-command`
+##### `mb-url-http-curl-program`
 
-Executable for cURL command.
+cURL program.
 
 #### [HTTPie][]
 
@@ -86,9 +86,9 @@ Executable for cURL command.
 
 HTTPie backend for `url-http`.
 
-##### `mb-url-http-httpie-command`
+##### `mb-url-http-httpie-program`
 
-Executable for HTTPie command.
+HTTPie program.
 
 ## License
 

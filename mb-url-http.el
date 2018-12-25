@@ -183,12 +183,12 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
     proc))
 
 
-(defcustom mb-url-http-curl-command "curl"
-  "Executable for Curl command."
+(defcustom mb-url-http-curl-program "curl"
+  "Curl program."
   :group 'mb-url)
 
 (defun mb-url-http--curl-command-list (url)
-  `(,mb-url-http-curl-command
+  `(,mb-url-http-curl-program
     "--silent" "--include"
     ,@(if (string= "HEAD" url-request-method)
           (list "--head")
@@ -222,12 +222,12 @@ first."
    #'mb-url-http-sentinel--curl))
 
 
-(defcustom mb-url-http-httpie-command "http"
-  "Executable for HTTPie command."
+(defcustom mb-url-http-httpie-program "http"
+  "HTTPie program."
   :group 'mb-url)
 
 (defun mb-url-http--httpie-command-list (url)
-  `(,mb-url-http-httpie-command
+  `(,mb-url-http-httpie-program
     "--print" "hb" "--pretty" "none"
     ,url-request-method ,(url-recreate-url url)
     ,@(mapcar #'mb-url-http-header-field-to-argument
