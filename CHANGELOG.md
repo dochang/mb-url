@@ -6,6 +6,7 @@
 
   - `mb-url-http-curl-switches`
   - `mb-url-http-httpie-switches`
+  - Add badges
 
 ### Changed ###
 
