@@ -2,6 +2,11 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+  - `mb-url-http-curl-switches`
+  - `mb-url-http-httpie-switches`
+
 ### Changed ###
 
   - Use ert-runner to test

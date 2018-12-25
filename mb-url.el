@@ -99,6 +99,10 @@
 ;;
 ;; cURL program.
 ;;
+;; ##### `mb-url-http-curl-switches'
+;;
+;; cURL switches.
+;;
 ;; #### [HTTPie][]
 ;;
 ;; [HTTPie]: http://httpie.org/
@@ -110,6 +114,10 @@
 ;; ##### `mb-url-http-httpie-program'
 ;;
 ;; HTTPie program.
+;;
+;; ##### `mb-url-http-httpie-switches'
+;;
+;; HTTPie switches.
 
 ;; License:
 ;;

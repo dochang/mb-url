@@ -187,6 +187,10 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   "Curl program."
   :group 'mb-url)
 
+(defcustom mb-url-http-curl-switches '()
+  "List of strings specifying switches to be passed to Curl."
+  :group 'mb-url)
+
 (defun mb-url-http--curl-command-list (url)
   `(,mb-url-http-curl-program
     "--silent" "--include"
@@ -200,7 +204,8 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
              (mapcar (lambda (arg) (list "--header" arg))
                      (mapcar #'mb-url-http-header-field-to-argument
                              url-request-extra-headers)))
-    ,(url-recreate-url url)))
+    ,(url-recreate-url url)
+    ,@mb-url-http-curl-switches))
 
 (defun mb-url-http-sentinel--curl (proc evt)
   "Curl returns the proxy response before the actual remote server response.
@@ -226,12 +231,17 @@ first."
   "HTTPie program."
   :group 'mb-url)
 
+(defcustom mb-url-http-httpie-switches '()
+  "List of strings specifying switches to be passed to HTTPie."
+  :group 'mb-url)
+
 (defun mb-url-http--httpie-command-list (url)
   `(,mb-url-http-httpie-program
     "--print" "hb" "--pretty" "none"
     ,url-request-method ,(url-recreate-url url)
     ,@(mapcar #'mb-url-http-header-field-to-argument
-              url-request-extra-headers)))
+              url-request-extra-headers)
+    ,@mb-url-http-httpie-switches))
 
 ;;;###autoload
 (defun mb-url-http-httpie (name url buffer default-sentinel)

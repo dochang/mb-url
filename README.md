@@ -78,6 +78,10 @@ cURL backend for `url-http`.
 
 cURL program.
 
+##### `mb-url-http-curl-switches`
+
+cURL switches.
+
 #### [HTTPie][]
 
 [HTTPie]: http://httpie.org/
@@ -89,6 +93,10 @@ HTTPie backend for `url-http`.
 ##### `mb-url-http-httpie-program`
 
 HTTPie program.
+
+##### `mb-url-http-httpie-switches`
+
+HTTPie switches.
 
 ## License
 
