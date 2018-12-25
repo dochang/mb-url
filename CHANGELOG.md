@@ -8,6 +8,10 @@
   - Fallback to `url-http` only if `mb-url-http-backend` is nil
   - Add more test cases
 
+### Deprecated ###
+
+  - Not recommended since Emacs 26
+
 ## [0.3.1] - 2018-10-11 ##
 
 ### Changed ###

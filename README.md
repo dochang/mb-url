@@ -20,6 +20,12 @@ The motivation of this package is I can't connect HTTPS url behind proxy
 [msg00756]: https://lists.gnu.org/archive/html/help-gnu-emacs/2015-08/msg00756.html
 [#10]: http://debbugs.gnu.org/cgi/bugreport.cgi?bug=10
 
+## Notice
+
+As the URL package has supported HTTPS over proxies supporting CONNECT since
+Emacs 26, this package is no longer recommended.  But it can still be used
+in Emacs < 26.
+
 ## Installation
 
 `mb-url` is available on [MELPA] and [el-get].
