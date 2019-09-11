@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+  - Replace test helpers with environment variable
+
 ## [0.4.0] - 2018-12-25 ##
 
 ### Added ###

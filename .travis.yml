@@ -7,6 +7,7 @@ env:
   global:
     - EVM_DIR="$HOME/.evm"
     - CASK_DIR="$HOME/.cask"
+    - MB_URL_TEST__HTTPBIN_PREFIX="http://127.0.0.1"
   matrix:
     - EVM_EMACS=emacs-24.4-travis
     - EVM_EMACS=emacs-24.5-travis
@@ -39,4 +40,4 @@ before_script:
   - sleep 15
 
 script:
-  - cask exec ert-runner --load test/travis-helper.el
+  - cask exec ert-runner

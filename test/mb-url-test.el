@@ -1,6 +1,6 @@
 ;;; mb-url-test.el --- Tests for mb-url
 
-;; Copyright (C) 2015, 2016, 2018 ZHANG Weiyi
+;; Copyright (C) 2015, 2016, 2018, 2019 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
 
@@ -40,6 +40,12 @@
 
 ;; Do not truncate the backtrace.  This makes ERT easy to debug.
 (setq ert-batch-backtrace-right-margin 256)
+
+(setq mb-url-test--httpbin-prefix
+      (let ((prefix (getenv "MB_URL_TEST__HTTPBIN_PREFIX")))
+        (if (mb-url-string-empty-p prefix)
+            "https://httpbin.org"
+          prefix)))
 
 (cl-defstruct (mb-url-test-response
                (:constructor mb-url-test-make-response)
@@ -90,12 +96,12 @@ Access-Control-Allow-Credentials: true
 
 ")
          (body "{
-  \"args\": {}, 
+  \"args\": {},
   \"headers\": {
-    \"Accept\": \"*/*\", 
-    \"Accept-Encoding\": \"gzip, deflate\", 
+    \"Accept\": \"*/*\",
+    \"Accept-Encoding\": \"gzip, deflate\",
     \"Host\": \"httpbin.org\"
-  }, 
+  },
   \"url\": \"https://httpbin.org/get\"
 }
 ")
