@@ -178,6 +178,84 @@
                "path": "/home/linuxbrew/.linuxbrew"
             }
          ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:26.1-dev",
+         "name": "test-emacs26.1",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:26.2-dev",
+         "name": "test-emacs26.2",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:26.3-dev",
+         "name": "test-emacs26.3",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
       }
    ],
    "volumes": [
