@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.5.0] - 2019-09-21 ##
+
 ### Changed ###
 
   - Replace test helpers with environment variable
@@ -131,7 +133,8 @@
 
   - Initial release
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/dochang/mb-url/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/dochang/mb-url/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/dochang/mb-url/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/dochang/mb-url/compare/0.2.1...0.3.0
