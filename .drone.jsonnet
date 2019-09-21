@@ -139,7 +139,7 @@ std.map(generate_pipeline, [
     linuxbrew_image: 'buildpack-deps:stable',
     locale_gen_cmds_func: locale_gen_cmds_default,
     ci_deps_cmds_func: std.prune,
-    emacs_vers: ['24.5', '25.1', '25.2', '25.3'],
+    emacs_vers: ['24.5', '25.1', '25.2', '25.3', '26.1', '26.2', '26.3'],
   },
   {
     # According to [1] and [2], Emacs 24.4 cannot be built on Ubuntu 18.04, so

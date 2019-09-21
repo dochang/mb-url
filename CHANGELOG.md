@@ -6,6 +6,7 @@
 
   - Replace test helpers with environment variable
   - Migrate from Travis to Drone
+  - Test for Emacs 26
 
 ## [0.4.0] - 2018-12-25 ##
 
