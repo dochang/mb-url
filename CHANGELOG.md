@@ -5,6 +5,7 @@
 ### Changed ###
 
   - Replace test helpers with environment variable
+  - Migrate from Travis to Drone
 
 ## [0.4.0] - 2018-12-25 ##
 
