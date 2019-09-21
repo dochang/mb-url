@@ -1,0 +1,318 @@
+---
+{
+   "kind": "pipeline",
+   "name": "default",
+   "services": [
+      {
+         "image": "kennethreitz/httpbin",
+         "name": "httpbin"
+      }
+   ],
+   "steps": [
+      {
+         "commands": [
+            "apt-get update",
+            "apt-get install --yes locales",
+            "echo \"en_US.UTF-8 UTF-8\" > /etc/locale.gen",
+            "locale-gen"
+         ],
+         "image": "buildpack-deps:stable",
+         "name": "install locales",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "apt-get update",
+            "apt-get install --yes git",
+            "git clone https://github.com/Homebrew/brew /home/linuxbrew/.linuxbrew/Homebrew",
+            "mkdir -p /home/linuxbrew/.linuxbrew/bin",
+            "ln -s ../Homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin"
+         ],
+         "image": "buildpack-deps:stable",
+         "name": "install Linuxbrew",
+         "volumes": [
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "brew update",
+            "brew bundle"
+         ],
+         "depends_on": [
+            "install locales",
+            "install Linuxbrew"
+         ],
+         "environment": {
+            "HOMEBREW_DEVELOPER": 1,
+            "HOMEBREW_NO_ANALYTICS": 1,
+            "HOMEBREW_NO_AUTO_UPDATE": 1,
+            "HOMEBREW_NO_INSTALL_CLEANUP": 1
+         },
+         "image": "buildpack-deps:stable",
+         "name": "install ci deps",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            },
+            {
+               "name": "cache",
+               "path": "/root/.cache"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:24.5-dev",
+         "name": "test-emacs24.5",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:25.1-dev",
+         "name": "test-emacs25.1",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:25.2-dev",
+         "name": "test-emacs25.2",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:25.3-dev",
+         "name": "test-emacs25.3",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      }
+   ],
+   "volumes": [
+      {
+         "name": "cache",
+         "temp": { }
+      },
+      {
+         "name": "locales",
+         "temp": { }
+      },
+      {
+         "name": "linuxbrew",
+         "temp": { }
+      }
+   ]
+}
+---
+{
+   "kind": "pipeline",
+   "name": "test for emacs 24.4",
+   "services": [
+      {
+         "image": "kennethreitz/httpbin",
+         "name": "httpbin"
+      }
+   ],
+   "steps": [
+      {
+         "commands": [
+            "apt-get update",
+            "apt-get install --yes locales",
+            "locale-gen en_US.UTF-8"
+         ],
+         "image": "ubuntu:12.04",
+         "name": "install locales",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "apt-get update",
+            "apt-get install --yes git",
+            "git clone https://github.com/Homebrew/brew /home/linuxbrew/.linuxbrew/Homebrew",
+            "mkdir -p /home/linuxbrew/.linuxbrew/bin",
+            "ln -s ../Homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin"
+         ],
+         "image": "ubuntu:12.04",
+         "name": "install Linuxbrew",
+         "volumes": [
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "apt-get update",
+            "apt-get install --yes build-essential curl file git",
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "brew update",
+            "brew bundle"
+         ],
+         "depends_on": [
+            "install locales",
+            "install Linuxbrew"
+         ],
+         "environment": {
+            "HOMEBREW_DEVELOPER": 1,
+            "HOMEBREW_NO_ANALYTICS": 1,
+            "HOMEBREW_NO_AUTO_UPDATE": 1,
+            "HOMEBREW_NO_INSTALL_CLEANUP": 1
+         },
+         "image": "ubuntu:12.04",
+         "name": "install ci deps",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            },
+            {
+               "name": "cache",
+               "path": "/root/.cache"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "cask install",
+            "sleep 15",
+            "cask exec ert-runner"
+         ],
+         "depends_on": [
+            "install ci deps"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:24.4-dev",
+         "name": "test-emacs24.4",
+         "volumes": [
+            {
+               "name": "locales",
+               "path": "/usr/lib/locale"
+            },
+            {
+               "name": "linuxbrew",
+               "path": "/home/linuxbrew/.linuxbrew"
+            }
+         ]
+      }
+   ],
+   "volumes": [
+      {
+         "name": "cache",
+         "temp": { }
+      },
+      {
+         "name": "locales",
+         "temp": { }
+      },
+      {
+         "name": "linuxbrew",
+         "temp": { }
+      }
+   ]
+}
+...
