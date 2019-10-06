@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.5.1] - 2019-10-06 ##
+
 ### Added ###
 
   - Add badges
@@ -137,7 +139,8 @@
 
   - Initial release
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/dochang/mb-url/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/dochang/mb-url/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/dochang/mb-url/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/dochang/mb-url/compare/0.3.0...0.3.1
