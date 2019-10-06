@@ -1,6 +1,6 @@
 ;;; mb-url.el --- Multiple Backends for Emacs URL package
 
-;; Copyright (C) 2015, 2016, 2018 ZHANG Weiyi
+;; Copyright (C) 2015, 2016, 2018, 2019 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
 
@@ -25,11 +25,14 @@
 
 ;; [![MELPA](http://melpa.org/packages/mb-url-badge.svg)](http://melpa.org/#/mb-url)
 ;; [![MELPA Stable](http://stable.melpa.org/packages/mb-url-badge.svg)](http://stable.melpa.org/#/mb-url)
+;; [![Build Status](https://cloud.drone.io/api/badges/dochang/mb-url/status.svg)](https://cloud.drone.io/dochang/mb-url)
 ;; [![Build Status](https://travis-ci.org/dochang/mb-url.svg?branch=master)](https://travis-ci.org/dochang/mb-url)
 ;; [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/dochang/mb-url.svg)](http://isitmaintained.com/project/dochang/mb-url "Average time to resolve an issue")
 ;; [![Percentage of issues still open](http://isitmaintained.com/badge/open/dochang/mb-url.svg)](http://isitmaintained.com/project/dochang/mb-url "Percentage of issues still open")
 ;; [![](https://img.shields.io/github/issues/dochang/mb-url.svg)](https://github.com/dochang/mb-url)
 ;; [![](https://img.shields.io/github/issues-pr/dochang/mb-url.svg)](https://github.com/dochang/mb-url)
+;; [![GitHub](https://img.shields.io/github/license/dochang/mb-url)](https://github.com/dochang/mb-url/blob/master/LICENSE)
+;; [![Say Thanks!](https://img.shields.io/badge/say-thanks-green)](https://saythanks.io/to/dochang)
 ;;
 ;; Multiple Backends for URL package.
 ;;
