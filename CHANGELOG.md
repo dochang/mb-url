@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Fixed ###
+
+- HTTP response body processing in sentinel
+
 ## [0.6.0] - 2021-09-16 ##
 
 ### Added ###
