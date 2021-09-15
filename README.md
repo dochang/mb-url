@@ -4,6 +4,7 @@
 *Version:* 0.5.1<br>
 *URL:* [https://github.com/dochang/mb-url](https://github.com/dochang/mb-url)<br>
 
+<!-- markdown-link-check-disable -->
 [![MELPA](http://melpa.org/packages/mb-url-badge.svg)](http://melpa.org/#/mb-url)
 [![MELPA Stable](http://stable.melpa.org/packages/mb-url-badge.svg)](http://stable.melpa.org/#/mb-url)
 [![Build Status](https://cloud.drone.io/api/badges/dochang/mb-url/status.svg)](https://cloud.drone.io/dochang/mb-url)
@@ -14,6 +15,13 @@
 [![Pull Requests](https://img.shields.io/github/issues-pr/dochang/mb-url.svg)](https://github.com/dochang/mb-url)
 [![GitHub](https://img.shields.io/github/license/dochang/mb-url)](https://github.com/dochang/mb-url/blob/master/LICENSE)
 [![Say Thanks!](https://img.shields.io/badge/say-thanks-green)](https://saythanks.io/to/dochang)
+<!--
+See the following issues for details.
+
+<https://github.com/BlitzKraft/saythanks.io/issues/60>
+<https://github.com/BlitzKraft/saythanks.io/issues/103>
+-->
+<!-- markdown-link-check-enable -->
 
 Multiple Backends for URL package.
 
