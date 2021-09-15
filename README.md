@@ -113,7 +113,7 @@ GPLv3
 
 ## Acknowledgements
 
-https://github.com/nicferrier/curl-url-retrieve
+<https://github.com/nicferrier/curl-url-retrieve>
 
 
 ---

@@ -136,7 +136,7 @@
 
 ;; Acknowledgements:
 ;;
-;; https://github.com/nicferrier/curl-url-retrieve
+;; <https://github.com/nicferrier/curl-url-retrieve>
 
 ;;; Code:
 
