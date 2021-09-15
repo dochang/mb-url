@@ -10,163 +10,58 @@
    ],
    "steps": [
       {
-         "commands": [
-            "apt-get update",
-            "apt-get install --yes locales",
-            "echo \"en_US.UTF-8 UTF-8\" > /etc/locale.gen",
-            "locale-gen"
-         ],
-         "image": "buildpack-deps:stable",
-         "name": "install locales",
-         "volumes": [
-            {
-               "name": "locales",
-               "path": "/usr/lib/locale"
-            }
-         ]
+         "image": "hello-world:linux",
+         "name": "no-op"
       },
       {
          "commands": [
-            "apt-get update",
-            "apt-get install --yes git",
-            "git clone https://github.com/Homebrew/brew /home/linuxbrew/.linuxbrew/Homebrew",
-            "mkdir -p /home/linuxbrew/.linuxbrew/bin",
-            "ln -s ../Homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin"
-         ],
-         "image": "buildpack-deps:stable",
-         "name": "install Linuxbrew",
-         "volumes": [
-            {
-               "name": "linuxbrew",
-               "path": "/home/linuxbrew/.linuxbrew"
-            }
-         ]
-      },
-      {
-         "commands": [
-            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
-            "brew update",
-            "brew bundle"
-         ],
-         "depends_on": [
-            "install locales",
-            "install Linuxbrew"
-         ],
-         "environment": {
-            "HOMEBREW_DEVELOPER": 1,
-            "HOMEBREW_NO_ANALYTICS": 1,
-            "HOMEBREW_NO_AUTO_UPDATE": 1,
-            "HOMEBREW_NO_INSTALL_CLEANUP": 1
-         },
-         "image": "buildpack-deps:stable",
-         "name": "install ci deps",
-         "volumes": [
-            {
-               "name": "locales",
-               "path": "/usr/lib/locale"
-            },
-            {
-               "name": "linuxbrew",
-               "path": "/home/linuxbrew/.linuxbrew"
-            },
-            {
-               "name": "cache",
-               "path": "/root/.cache"
-            }
-         ]
-      },
-      {
-         "commands": [
-            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "apt-get update && apt-get --yes install curl httpie",
             "cask install",
             "sleep 15",
             "cask exec ert-runner"
          ],
          "depends_on": [
-            "install ci deps"
+            "no-op"
          ],
          "environment": {
             "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
          },
          "image": "silex/emacs:24-ci-cask",
-         "name": "test-emacs24",
-         "volumes": [
-            {
-               "name": "locales",
-               "path": "/usr/lib/locale"
-            },
-            {
-               "name": "linuxbrew",
-               "path": "/home/linuxbrew/.linuxbrew"
-            }
-         ]
+         "name": "test-emacs24"
       },
       {
          "commands": [
-            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "apt-get update && apt-get --yes install curl httpie",
             "cask install",
             "sleep 15",
             "cask exec ert-runner"
          ],
          "depends_on": [
-            "install ci deps"
+            "no-op"
          ],
          "environment": {
             "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
          },
          "image": "silex/emacs:25-ci-cask",
-         "name": "test-emacs25",
-         "volumes": [
-            {
-               "name": "locales",
-               "path": "/usr/lib/locale"
-            },
-            {
-               "name": "linuxbrew",
-               "path": "/home/linuxbrew/.linuxbrew"
-            }
-         ]
+         "name": "test-emacs25"
       },
       {
          "commands": [
-            "eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"",
+            "apt-get update && apt-get --yes install curl httpie",
             "cask install",
             "sleep 15",
             "cask exec ert-runner"
          ],
          "depends_on": [
-            "install ci deps"
+            "no-op"
          ],
          "environment": {
             "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
          },
          "image": "silex/emacs:26-ci-cask",
-         "name": "test-emacs26",
-         "volumes": [
-            {
-               "name": "locales",
-               "path": "/usr/lib/locale"
-            },
-            {
-               "name": "linuxbrew",
-               "path": "/home/linuxbrew/.linuxbrew"
-            }
-         ]
+         "name": "test-emacs26"
       }
    ],
-   "volumes": [
-      {
-         "name": "cache",
-         "temp": { }
-      },
-      {
-         "name": "locales",
-         "temp": { }
-      },
-      {
-         "name": "linuxbrew",
-         "temp": { }
-      }
-   ]
+   "type": "docker"
 }
 ...
