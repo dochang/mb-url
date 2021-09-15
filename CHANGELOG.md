@@ -5,6 +5,7 @@
 ### Added ###
 
 - Lint project by Mega-Linter
+- Test case for Emacs 27
 
 ### Changed ###
 

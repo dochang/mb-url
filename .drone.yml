@@ -78,6 +78,22 @@
          },
          "image": "silex/emacs:26-ci-eldev",
          "name": "test-emacs26"
+      },
+      {
+         "commands": [
+            "apt-get update && apt-get --yes install curl httpie",
+            "sleep 15",
+            "eldev lint",
+            "eldev test"
+         ],
+         "depends_on": [
+            "no-op"
+         ],
+         "environment": {
+            "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
+         },
+         "image": "silex/emacs:27-ci-eldev",
+         "name": "test-emacs27"
       }
    ],
    "type": "docker"
