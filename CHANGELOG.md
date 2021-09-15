@@ -2,15 +2,15 @@
 
 ## [Unreleased] ##
 
-### Added
+### Added ###
 
 - Lint project by Mega-Linter
 
-### Changed
+### Changed ###
 
 - Replace Cask with Eldev
 
-### Removed
+### Removed ###
 
 - Drop test cases for non-latest images of each major version
 - Drop Linuxbrew use in CI
