@@ -33,7 +33,7 @@
 (require 'mb-url)
 
 (defcustom mb-url-http-backend nil
-  "Backend for url-http"
+  "Backend for url-http."
   :type 'function
   :group 'mb-url)
 
