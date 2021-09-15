@@ -6,6 +6,7 @@
 
 - Lint project by Mega-Linter
 - Test case for Emacs 27
+- GitHub Actions workflow
 
 ### Changed ###
 
