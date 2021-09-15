@@ -3,6 +3,7 @@
 ;; Copyright (C) 2015, 2016, 2018 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
+;; Keywords: comm, data, processes
 
 ;; This file is not part of GNU Emacs.
 

@@ -19,7 +19,7 @@ replace = '''
 [{{new_version}}]: https://github.com/dochang/mb-url/compare/{{old_version}}...{{new_version}}
 '''
 
-[[files."mb-url-pkg.el"]]
+[[files."mb-url.el"]]
 search = '{{old_version}}'
 replace = '{{new_version}}'
 
