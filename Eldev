@@ -10,3 +10,5 @@
 (eldev-add-extra-dependencies
  'test
  's)
+
+(setq eldev-lint-disabled '(package))
