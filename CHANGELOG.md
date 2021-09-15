@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Removed
+
+  - Drop test cases for non-latest images of each major version
+
 ## [0.5.1] - 2019-10-06 ##
 
 ### Added ###
