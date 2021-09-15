@@ -1,6 +1,24 @@
 ---
 {
    "kind": "pipeline",
+   "name": "Mega-Linter",
+   "steps": [
+      {
+         "environment": {
+            "DEFAULT_WORKSPACE": "/drone/src"
+         },
+         "image": "nvuillam/mega-linter:v4",
+         "name": "Lint"
+      }
+   ],
+   "type": "docker",
+   "workspace": {
+      "path": "/drone/src"
+   }
+}
+---
+{
+   "kind": "pipeline",
    "name": "default",
    "services": [
       {

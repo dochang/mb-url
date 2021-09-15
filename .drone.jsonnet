@@ -19,6 +19,23 @@ local test_step(ci_deps_cmds) = function(emacs_ver) {
   {
     kind: 'pipeline',
     type: 'docker',
+    name: 'Mega-Linter',
+    workspace: {
+      path: '/drone/src',
+    },
+    steps: [
+      {
+        name: 'Lint',
+        image: 'nvuillam/mega-linter:v4',
+        environment: {
+          DEFAULT_WORKSPACE: '/drone/src',
+        },
+      },
+    ],
+  },
+  {
+    kind: 'pipeline',
+    type: 'docker',
     name: 'default',
     services: [
       {

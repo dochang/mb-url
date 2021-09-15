@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added
+
+  - Lint project by Mega-Linter
+
 ### Changed
 
   - Replace Cask with Eldev
