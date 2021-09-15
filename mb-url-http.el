@@ -3,6 +3,7 @@
 ;; Copyright (C) 2015, 2016, 2018 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
+;; Keywords: comm, data, processes
 
 ;; This file is not part of GNU Emacs.
 
@@ -33,11 +34,12 @@
 (require 'mb-url)
 
 (defcustom mb-url-http-backend nil
-  "Backend for url-http"
+  "Backend for `url-http'."
   :type 'function
   :group 'mb-url)
 
 (defun mb-url-http--goto-next-body ()
+  "Goto next part of body."
   (re-search-forward "^\r\n"))
 
 (defun mb-url-http--delete-proxy-response ()
@@ -68,6 +70,11 @@ This function deletes the first block (from proxy)."
     (delete-region (point) (progn (mb-url-http--goto-next-body) (point)))))
 
 (defun mb-url-http-sentinel (proc evt)
+  "Sentinel used to fix built-in sentinel.
+
+PROC is the process.
+
+EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
       (let ((url-http-end-of-headers
@@ -81,6 +88,7 @@ This function deletes the first block (from proxy)."
         (url-http-end-of-document-sentinel proc evt)))))
 
 (defun mb-url-http-header-field-to-argument (header)
+  "Convert HEADER to command line arguments."
   (let ((name (car header))
         (value (cdr header)))
     (cond ((null value)
@@ -91,6 +99,7 @@ This function deletes the first block (from proxy)."
            (format "%s:%s" name value)))))
 
 (defun mb-url-http-process-send-url-request-data (proc)
+  "Send request data, in binary form, to PROC."
   (unless (mb-url-string-empty-p url-request-data)
     (set-process-coding-system proc 'binary 'binary)
     (process-send-string proc url-request-data))
@@ -98,6 +107,7 @@ This function deletes the first block (from proxy)."
   proc)
 
 (defun mb-url-http--generate-name (url)
+  "Generate process name based on URL."
   (format "*mb-url-http-%s-%s" url-request-method (url-recreate-url url)))
 
 ;;;###autoload
@@ -175,7 +185,9 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
          url callback cbargs retry-buffer rest-args))
 
 (defun mb-url-http-make-pipe-process (name buffer command &optional sentinel)
-  "Make a pipe process."
+  "Make a pipe process.
+
+Pass NAME, BUFFER, COMMAND and SENTINEL to `start-process' as is."
   (let ((proc (let ((process-connection-type nil))
                 (apply #'start-process name buffer command))))
     (set-process-sentinel proc (or sentinel #'mb-url-http-sentinel))
@@ -192,6 +204,7 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   :group 'mb-url)
 
 (defun mb-url-http--curl-command-list (url)
+  "Return curl command list for URL."
   `(,mb-url-http-curl-program
     "--silent" "--include"
     ,@(if (string= "HEAD" url-request-method)
@@ -208,9 +221,13 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
     ,@mb-url-http-curl-switches))
 
 (defun mb-url-http-sentinel--curl (proc evt)
-  "Curl returns the proxy response before the actual remote server response.
+  "Curl return the proxy response before the actual remote server response.
 It makes Emacs hard to parse the response message.  Delete the proxy response
-first."
+first.
+
+PROC is the process.
+
+EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
       (save-excursion
@@ -220,7 +237,16 @@ first."
 
 ;;;###autoload
 (defun mb-url-http-curl (name url buffer default-sentinel)
-  "cURL backend for `mb-url-http'."
+  "\"cURL\" backend for `mb-url-http'.
+
+NAME is the process name.
+
+URL is the url which curl sends the request data to.
+
+BUFFER is the process buffer.
+
+DEFAULT-SENTINEL is the default sentinel of mb-url.  But curl backend uses its
+own sentinel instead."
   (mb-url-http-make-pipe-process
    name buffer
    (mb-url-http--curl-command-list url)
@@ -236,6 +262,7 @@ first."
   :group 'mb-url)
 
 (defun mb-url-http--httpie-command-list (url)
+  "Return httpie command list for URL."
   `(,mb-url-http-httpie-program
     "--print" "hb" "--pretty" "none"
     ,url-request-method ,(url-recreate-url url)
@@ -245,7 +272,15 @@ first."
 
 ;;;###autoload
 (defun mb-url-http-httpie (name url buffer default-sentinel)
-  "HTTPie backend for `mb-url-http'."
+  "HTTPie backend for `mb-url-http'.
+
+NAME is the process name.
+
+URL is the url which httpie sends the request data to.
+
+BUFFER is the process buffer.
+
+DEFAULT-SENTINEL is the default sentinel of mb-url."
   (mb-url-http-make-pipe-process
    name buffer
    (mb-url-http--httpie-command-list url)

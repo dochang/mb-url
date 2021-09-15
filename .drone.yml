@@ -16,9 +16,9 @@
       {
          "commands": [
             "apt-get update && apt-get --yes install curl httpie",
-            "cask install",
             "sleep 15",
-            "cask exec ert-runner"
+            "eldev lint",
+            "eldev test"
          ],
          "depends_on": [
             "no-op"
@@ -26,15 +26,15 @@
          "environment": {
             "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
          },
-         "image": "silex/emacs:24-ci-cask",
+         "image": "silex/emacs:24-ci-eldev",
          "name": "test-emacs24"
       },
       {
          "commands": [
             "apt-get update && apt-get --yes install curl httpie",
-            "cask install",
             "sleep 15",
-            "cask exec ert-runner"
+            "eldev lint",
+            "eldev test"
          ],
          "depends_on": [
             "no-op"
@@ -42,15 +42,15 @@
          "environment": {
             "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
          },
-         "image": "silex/emacs:25-ci-cask",
+         "image": "silex/emacs:25-ci-eldev",
          "name": "test-emacs25"
       },
       {
          "commands": [
             "apt-get update && apt-get --yes install curl httpie",
-            "cask install",
             "sleep 15",
-            "cask exec ert-runner"
+            "eldev lint",
+            "eldev test"
          ],
          "depends_on": [
             "no-op"
@@ -58,7 +58,7 @@
          "environment": {
             "MB_URL_TEST__HTTPBIN_PREFIX": "http://httpbin"
          },
-         "image": "silex/emacs:26-ci-cask",
+         "image": "silex/emacs:26-ci-eldev",
          "name": "test-emacs26"
       }
    ],

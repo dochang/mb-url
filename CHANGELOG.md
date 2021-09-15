@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed
+
+  - Replace Cask with Eldev
+
 ### Removed
 
   - Drop test cases for non-latest images of each major version

@@ -3,6 +3,10 @@
 ;; Copyright (C) 2015, 2016, 2018, 2019 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
+;; Version: 0.5.1
+;; Package-Requires: ((emacs "24.4"))
+;; Keywords: comm, data, processes, hypermedia
+;; URL: https://github.com/dochang/mb-url
 
 ;; This file is not part of GNU Emacs.
 

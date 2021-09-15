@@ -1,6 +1,8 @@
 # mb-url - Multiple Backends for Emacs URL package
 
 *Author:* ZHANG Weiyi <dochang@gmail.com><br>
+*Version:* 0.5.1<br>
+*URL:* [https://github.com/dochang/mb-url](https://github.com/dochang/mb-url)<br>
 
 [![MELPA](http://melpa.org/packages/mb-url-badge.svg)](http://melpa.org/#/mb-url)
 [![MELPA Stable](http://stable.melpa.org/packages/mb-url-badge.svg)](http://stable.melpa.org/#/mb-url)

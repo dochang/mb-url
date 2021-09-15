@@ -92,3 +92,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Added automatically by ‘eldev init’.
+/.eldev
+/Eldev-local
