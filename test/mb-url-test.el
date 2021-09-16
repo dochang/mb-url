@@ -159,6 +159,31 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-test--foobar)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
+(ert-deftest mb-url-test-051-sentinal ()
+  (unwind-protect
+      (progn
+        (advice-add 'url-http :around 'mb-url-http-around-advice)
+        (mapc (lambda (backend)
+                (let* ((mb-url-http-backend backend)
+                       (url (format "%s/image/png" mb-url-test--httpbin-prefix))
+                       (buffer (url-retrieve-synchronously url t t)))
+                  (with-current-buffer buffer
+                    (set-buffer-multibyte nil)
+                    (goto-char (point-min))
+                    (let ((end-of-headers
+                           (save-excursion
+                             (goto-char (point-min))
+                             (re-search-forward "\n\n" nil t))))
+                      (should
+                       (string=
+                        (buffer-substring end-of-headers (+ end-of-headers 8))
+                        (unibyte-string #x89 #x50 #x4e #x47 #x0d #x0a #x1a #x0a)))))))
+              (list 'mb-url-http-curl
+                    #'mb-url-http-curl
+                    'mb-url-http-httpie
+                    #'mb-url-http-httpie)))
+    (advice-remove 'url-http 'mb-url-http-around-advice)))
+
 (provide 'mb-url-test)
 
 ;;; mb-url-test.el ends here
