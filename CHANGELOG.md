@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.6.0] - 2021-09-16 ##
+
 ### Added ###
 
 - Lint project by Mega-Linter
@@ -160,7 +162,8 @@
 <!-- Skip checking the links status because the CHANGELOG is always updated
 before the tag is created -->
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/dochang/mb-url/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/dochang/mb-url/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/dochang/mb-url/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/dochang/mb-url/compare/0.3.1...0.4.0
