@@ -1,6 +1,6 @@
 ;;; mb-url.el --- Multiple Backends for Emacs URL package
 
-;; Copyright (C) 2015, 2016, 2018, 2019 ZHANG Weiyi
+;; Copyright (C) 2015, 2016, 2018, 2019, 2021 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
 ;; Version: 0.5.1
