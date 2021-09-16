@@ -23,6 +23,10 @@ replace = '''
 search = '{{old_version}}'
 replace = '{{new_version}}'
 
+[[files."README.md"]]
+search = '{{old_version}}'
+replace = '{{new_version}}'
+
 [[files."Cask"]]
 search = '{{old_version}}'
 replace = '{{new_version}}'
