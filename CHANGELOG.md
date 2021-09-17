@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.6.1] - 2021-09-17 ##
+
 ### Fixed ###
 
 - HTTP response body processing in sentinel
@@ -166,7 +168,8 @@
 <!-- Skip checking the links status because the CHANGELOG is always updated
 before the tag is created -->
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/dochang/mb-url/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/dochang/mb-url/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/dochang/mb-url/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/dochang/mb-url/compare/0.4.0...0.5.0
