@@ -199,9 +199,12 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   "Make a pipe process.
 
 Pass NAME, BUFFER, COMMAND and SENTINEL to `start-process' as is."
-  (let ((proc (let ((process-connection-type nil))
-                (apply #'start-process name buffer command))))
-    (set-process-sentinel proc (or sentinel #'mb-url-http-sentinel))
+  (let ((proc (make-process :name name
+				            :connection-type 'pipe
+				            :buffer buffer
+				            :stderr "*mb-url-http-curl-stderr*"
+				            :sentinel (or sentinel #'mb-url-http-sentinel)
+				            :command command)))
     (mb-url-http-process-send-url-request-data proc)
     proc))
 
@@ -217,7 +220,7 @@ Pass NAME, BUFFER, COMMAND and SENTINEL to `start-process' as is."
 (defun mb-url-http--curl-command-list (url)
   "Return curl command list for URL."
   `(,mb-url-http-curl-program
-    "--silent" "--include"
+    "--silent" "--include" "--fail" "--show-error"
     ,@(if (string= "HEAD" url-request-method)
           (list "--head")
         (list "--request" url-request-method))
