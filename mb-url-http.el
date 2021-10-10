@@ -193,7 +193,12 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   ;; `rest-args' is required because `url-http' adds an argument called
   ;; `gateway-method' since Emacs 25.
   (apply (if mb-url-http-backend #'mb-url-http fn)
-         url callback cbargs retry-buffer rest-args))
+         url
+         (lexical-let ((cb callback))
+           (lambda (&rest args)
+             (mm-disable-multibyte)
+             (apply cb args)))
+         cbargs retry-buffer rest-args))
 
 (defun mb-url-http-make-pipe-process (name buffer command &optional sentinel)
   "Make a pipe process.
