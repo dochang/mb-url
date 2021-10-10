@@ -1,4 +1,4 @@
-;;; mb-url-http.el --- Backends for `url-http'
+;;; mb-url-http.el --- Backends for `url-http'. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015, 2016, 2018, 2021 ZHANG Weiyi
 
@@ -194,10 +194,9 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   ;; `gateway-method' since Emacs 25.
   (apply (if mb-url-http-backend #'mb-url-http fn)
          url
-         (lexical-let ((cb callback))
-           (lambda (&rest args)
-             (mm-disable-multibyte)
-             (apply cb args)))
+         (lambda (&rest args)
+           (mm-disable-multibyte)
+           (apply callback args))
          cbargs retry-buffer rest-args))
 
 (defun mb-url-http-make-pipe-process (name buffer command &optional sentinel)
