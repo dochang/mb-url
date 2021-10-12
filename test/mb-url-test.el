@@ -34,6 +34,7 @@
 (require 'url-http)
 
 (require 's)
+(require 'el-mock)
 
 (require 'mb-url)
 (require 'mb-url-http)
@@ -127,6 +128,54 @@ Access-Control-Allow-Credentials: true
         '((("X-Foo1" . "bar") . "X-Foo1:bar")
           (("X-Foo2" . "") . "X-Foo2;")
           (("X-Foo3" . nil) . "X-Foo3"))))
+
+(ert-deftest mb-url-test-030-http--goto-next-body ()
+  (mapc (lambda (case)
+          (let ((text (nth 0 case))
+                (char (nth 1 case))
+                (errtype (nth 2 case)))
+            (with-temp-buffer
+              (insert text)
+              (goto-char (point-min))
+              (cond (errtype
+                     (should-error (mb-url-http--goto-next-body) :type errtype))
+                    (t
+                     (mb-url-http--goto-next-body)
+                     (should (= (following-char) char)))))))
+        '(("a\r\nb\r\n\r\nc" ?c nil)
+          ("a\nb\n\nc" ?c nil)
+          ("a\rb\r\rc" ?c search-failed))))
+
+(ert-deftest mb-url-test-031-http--delete-proxy-response ()
+  (mapc (lambda (case)
+          (let ((before (car case))
+                (after (cdr case)))
+            (with-temp-buffer
+              (insert before)
+              (goto-char (point-min))
+              (mb-url-http--delete-proxy-response)
+              (should (string= (buffer-string) after)))))
+        '(("HTTP/1.1 200 Connection established\r\nProxy-Header: foo\r\n\r\nHTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n")
+          ("HTTP/1.1 200 Connection established\nProxy-Header: foo\n\nHTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
+          ("HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
+
+(ert-deftest mb-url-test-032-http-sentinel ()
+  (mapc (lambda (case)
+          (let ((before (car case))
+                (after (cdr case)))
+            (with-temp-buffer
+              (insert before)
+              (goto-char (point-min))
+              (let ((buf (current-buffer)))
+                (with-mock
+                 (stub process-buffer => buf)
+                 (stub url-http-end-of-document-sentinel)
+                 (mb-url-http-sentinel "process placeholder" "finished\n")))
+              (should (string= (buffer-string) after)))))
+        '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
+          ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
+          ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n")
+          ("HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
 
 (ert-deftest mb-url-test-050-http ()
   (unwind-protect
