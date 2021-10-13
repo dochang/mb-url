@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.7.0] - 2021-10-13 ##
+
 ### Added ###
 
 - Data types for user options
@@ -173,7 +175,8 @@
 <!-- Skip checking the links status because the CHANGELOG is always updated
 before the tag is created -->
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/dochang/mb-url/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/dochang/mb-url/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/dochang/mb-url/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/dochang/mb-url/compare/0.5.0...0.5.1
