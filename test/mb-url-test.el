@@ -1,4 +1,4 @@
-;;; mb-url-test.el --- Tests for mb-url
+;;; mb-url-test.el --- Tests for mb-url  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015, 2016, 2018, 2019 ZHANG Weiyi
 

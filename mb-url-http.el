@@ -1,4 +1,4 @@
-;;; mb-url-http.el --- Backends for `url-http'
+;;; mb-url-http.el --- Backends for `url-http'  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015, 2016, 2018, 2021 ZHANG Weiyi
 

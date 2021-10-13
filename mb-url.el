@@ -1,4 +1,4 @@
-;;; mb-url.el --- Multiple Backends for Emacs URL package
+;;; mb-url.el --- Multiple Backends for Emacs URL package  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015, 2016, 2018, 2019, 2021 ZHANG Weiyi
 
