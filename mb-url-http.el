@@ -211,10 +211,12 @@ URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
 (defun mb-url-http-make-pipe-process (name buffer command &optional sentinel)
   "Make a pipe process.
 
-Pass NAME, BUFFER, COMMAND and SENTINEL to `start-process' as is."
-  (let ((proc (let ((process-connection-type nil))
-                (apply #'start-process name buffer command))))
-    (set-process-sentinel proc (or sentinel #'mb-url-http-sentinel))
+Pass NAME, BUFFER, COMMAND and SENTINEL to `make-process' as is."
+  (let ((proc (make-process :name name
+                            :buffer buffer
+                            :command command
+                            :connection-type 'pipe
+                            :sentinel (or sentinel #'mb-url-http-sentinel))))
     (mb-url-http-process-send-url-request-data proc)
     proc))
 

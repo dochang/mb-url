@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+- Create process by `make-process` instead of `start-process`
+
 ### Removed ###
 
 - Emacs 24 support
