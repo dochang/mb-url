@@ -35,7 +35,9 @@
 
 (defcustom mb-url-http-backend nil
   "Backend for `url-http'."
-  :type 'function
+  :type '(choice (function :tag "curl" mb-url-http-curl)
+                 (function :tag "httpie" mb-url-http-httpie)
+                 (const :tag "None" nil))
   :group 'mb-url)
 
 (defun mb-url-http--goto-next-body ()
@@ -208,10 +210,12 @@ Pass NAME, BUFFER, COMMAND and SENTINEL to `start-process' as is."
 
 (defcustom mb-url-http-curl-program "curl"
   "Curl program."
+  :type 'string
   :group 'mb-url)
 
 (defcustom mb-url-http-curl-switches '()
   "List of strings specifying switches to be passed to Curl."
+  :type '(repeat (string))
   :group 'mb-url)
 
 (defun mb-url-http--curl-command-list (url)
@@ -266,10 +270,12 @@ own sentinel instead."
 
 (defcustom mb-url-http-httpie-program "http"
   "HTTPie program."
+  :type 'string
   :group 'mb-url)
 
 (defcustom mb-url-http-httpie-switches '()
   "List of strings specifying switches to be passed to HTTPie."
+  :type '(repeat (string))
   :group 'mb-url)
 
 (defun mb-url-http--httpie-command-list (url)

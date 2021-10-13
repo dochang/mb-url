@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+- Data types for user options
+
 ## [0.6.1] - 2021-09-17 ##
 
 ### Fixed ###
