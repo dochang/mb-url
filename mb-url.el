@@ -4,7 +4,7 @@
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
 ;; Version: 0.7.0
-;; Package-Requires: ((emacs "24.4"))
+;; Package-Requires: ((emacs "25"))
 ;; Keywords: comm, data, processes, hypermedia
 ;; URL: https://github.com/dochang/mb-url
 
@@ -78,10 +78,6 @@
 ;; dir into `load-path'.
 ;;
 ;; `mb-url' depends on `cl-lib';  The test code also depends on `s'.
-;;
-;; NOTE: the test code requires GNU Emacs 24.4 and above because it uses the
-;; new `nadvice' package.  `mb-url' may support GNU Emacs 24.3 and below but
-;; it's not tested with those versions.
 
 ;; Backends:
 ;;

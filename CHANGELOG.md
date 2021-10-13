@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Removed ###
+
+- Emacs 24 support
+
 ## [0.7.0] - 2021-10-13 ##
 
 ### Added ###

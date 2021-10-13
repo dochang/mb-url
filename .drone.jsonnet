@@ -51,6 +51,6 @@ local test_step(ci_deps_cmds) = function(emacs_ver) {
       },
     ] + std.map(test_step([
       'apt-get update && apt-get --yes install curl httpie',
-    ]), ['24', '25', '26', '27']),
+    ]), ['25', '26', '27']),
   },
 ]
