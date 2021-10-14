@@ -118,3 +118,4 @@ jobs:
           eldev test
         env:
           MB_URL_TEST__HTTPBIN_PREFIX: 'http://localhost:${{ job.services.httpbin.ports[80] }}'
+        timeout-minutes: 5
