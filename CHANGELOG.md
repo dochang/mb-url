@@ -6,6 +6,7 @@
 
 - Create process by `make-process` instead of `start-process`
 - Use lexical binding for the whole project
+- Make backends always wait for stdin
 
 ### Removed ###
 
