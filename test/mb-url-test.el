@@ -230,7 +230,6 @@ Access-Control-Allow-Credentials: true
                        (url (format "%s/image/png" mb-url-test--httpbin-prefix))
                        (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer
-                    (set-buffer-multibyte nil)
                     (goto-char (point-min))
                     (let ((end-of-headers
                            (save-excursion
