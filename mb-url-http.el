@@ -71,6 +71,37 @@ This function deletes the first block (from proxy)."
   (when (looking-at-p "HTTP/[0-9]+\\.[0-9]+ 2[0-9][0-9] [^\r\n]* established\r?\n")
     (delete-region (point) (progn (mb-url-http--goto-next-body) (point)))))
 
+(defun mb-url-http--delete-carriage-return (buffer)
+  "Delete carriage return from the header part in BUFFER."
+  (with-current-buffer buffer
+    (let* ((rnrn-end-of-headers
+            (save-excursion
+              (goto-char (point-min))
+              (re-search-forward "\r\n\r\n" nil t)))
+           (nn-end-of-headers
+            (save-excursion
+              (goto-char (point-min))
+              (re-search-forward "\n\n" nil t)))
+           (end-of-headers (cond ((not nn-end-of-headers)
+                                  rnrn-end-of-headers)
+                                 ((not rnrn-end-of-headers)
+                                  nil)
+                                 ((< rnrn-end-of-headers nn-end-of-headers)
+                                  rnrn-end-of-headers)))
+           (buf (current-buffer)))
+      (when end-of-headers
+        (with-temp-buffer
+          (insert-buffer-substring buf nil end-of-headers)
+          (goto-char (point-min))
+          (while (re-search-forward "\r\n" nil t)
+            (replace-match "\n"))
+          (let ((hdr-buf (current-buffer)))
+            (with-temp-buffer
+              (insert-buffer-substring hdr-buf)
+              (insert-buffer-substring buf end-of-headers nil)
+              (buffer-swap-text buf)))))))
+  buffer)
+
 (defun mb-url-http-sentinel (proc evt)
   "Sentinel used to fix built-in sentinel.
 
@@ -79,32 +110,7 @@ PROC is the process.
 EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
-      (let* ((rnrn-end-of-headers
-              (save-excursion
-                (goto-char (point-min))
-                (re-search-forward "\r\n\r\n" nil t)))
-             (nn-end-of-headers
-              (save-excursion
-                (goto-char (point-min))
-                (re-search-forward "\n\n" nil t)))
-             (end-of-headers (cond ((not nn-end-of-headers)
-                                    rnrn-end-of-headers)
-                                   ((not rnrn-end-of-headers)
-                                    nil)
-                                   ((< rnrn-end-of-headers nn-end-of-headers)
-                                    rnrn-end-of-headers)))
-             (buf (current-buffer)))
-        (when end-of-headers
-          (with-temp-buffer
-            (insert-buffer-substring buf nil end-of-headers)
-            (goto-char (point-min))
-            (while (re-search-forward "\r\n" nil t)
-              (replace-match "\n"))
-            (let ((hdr-buf (current-buffer)))
-              (with-temp-buffer
-                (insert-buffer-substring hdr-buf)
-                (insert-buffer-substring buf end-of-headers nil)
-                (buffer-swap-text buf))))))
+      (mb-url-http--delete-carriage-return (current-buffer))
       (let ((url-http-end-of-headers
              (save-excursion
                (goto-char (point-min))

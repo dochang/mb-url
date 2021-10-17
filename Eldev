@@ -9,7 +9,6 @@
 
 (eldev-add-extra-dependencies
  'test
- 's
- 'el-mock)
+ 's)
 
 (setq eldev-lint-disabled '(package))
