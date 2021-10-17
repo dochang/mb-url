@@ -230,7 +230,6 @@ Access-Control-Allow-Credentials: true
                        (url (format "%s/image/png" mb-url-test--httpbin-prefix))
                        (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer
-                    (set-buffer-multibyte nil)
                     (goto-char (point-min))
                     (let ((end-of-headers
                            (save-excursion
@@ -240,6 +239,31 @@ Access-Control-Allow-Credentials: true
                        (string=
                         (buffer-substring end-of-headers (+ end-of-headers 8))
                         (unibyte-string #x89 #x50 #x4e #x47 #x0d #x0a #x1a #x0a)))))))
+              (list 'mb-url-http-curl
+                    #'mb-url-http-curl
+                    'mb-url-http-httpie
+                    #'mb-url-http-httpie)))
+    (advice-remove 'url-http 'mb-url-http-around-advice)))
+
+(ert-deftest mb-url-test-052-unibyte ()
+  (unwind-protect
+      (progn
+        (advice-add 'url-http :around 'mb-url-http-around-advice)
+        (mapc (lambda (backend)
+                (let* ((mb-url-http-backend backend)
+                       (url (format "%s/post" mb-url-test--httpbin-prefix))
+                       (url-request-method "POST")
+                       (url-request-extra-headers '(("Content-Type" . "text/plain")))
+                       (url-request-data "你好，世界")
+                       (buffer (url-retrieve-synchronously url t t)))
+                  (with-current-buffer buffer
+                    (goto-char (point-min))
+                    (let* ((resp (mb-url-test-parse-response))
+                           (json (mb-url-test-response-json resp)))
+                      (should (= (mb-url-test-response-status-code resp) 200))
+                      (should (string= (mb-url-test-response-header "Content-Type" resp) "application/json"))
+                      (should (string= (assoc-default 'Content-Type (assoc-default 'headers json)) "text/plain"))
+                      (should (string= (assoc-default 'data json) url-request-data))))))
               (list 'mb-url-http-curl
                     #'mb-url-http-curl
                     'mb-url-http-httpie

@@ -208,11 +208,20 @@ of `url-http'."
 
 FN is the original function.
 
-URL, CALLBACK, CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
+URL must be a parsed URL.  See `url-generic-parse-url' for details.
+
+When retrieval is completed, the multibyte flag of the retrieval buffer is set
+to nil, then execute the function CALLBACK.
+
+CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
   ;; `rest-args' is required because `url-http' adds an argument called
   ;; `gateway-method' since Emacs 25.
   (apply (if mb-url-http-backend #'mb-url-http fn)
-         url callback cbargs retry-buffer rest-args))
+         url
+         (lambda (&rest args)
+           (set-buffer-multibyte nil)
+           (apply callback args))
+         cbargs retry-buffer rest-args))
 
 (defun mb-url-http-make-pipe-process (name buffer command &optional sentinel)
   "Make a pipe process.
