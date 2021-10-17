@@ -5,6 +5,7 @@
 ### Changed ###
 
 - Create process by `make-process` instead of `start-process`
+- Use lexical binding for the whole project
 
 ### Removed ###
 

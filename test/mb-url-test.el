@@ -1,4 +1,4 @@
-;;; mb-url-test.el --- Tests for mb-url
+;;; mb-url-test.el --- Tests for mb-url  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015, 2016, 2018, 2019 ZHANG Weiyi
 
@@ -34,7 +34,6 @@
 (require 'url-http)
 
 (require 's)
-(require 'el-mock)
 
 (require 'mb-url)
 (require 'mb-url-http)
@@ -159,18 +158,14 @@ Access-Control-Allow-Credentials: true
           ("HTTP/1.1 200 Connection established\nProxy-Header: foo\n\nHTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
           ("HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
 
-(ert-deftest mb-url-test-032-http-sentinel ()
+(ert-deftest mb-url-test-032-http--delete-carriage-return ()
   (mapc (lambda (case)
           (let ((before (car case))
                 (after (cdr case)))
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
-              (let ((buf (current-buffer)))
-                (with-mock
-                 (stub process-buffer => buf)
-                 (stub url-http-end-of-document-sentinel)
-                 (mb-url-http-sentinel "process placeholder" "finished\n")))
+              (mb-url-http--delete-carriage-return (current-buffer))
               (should (string= (buffer-string) after)))))
         '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
           ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
