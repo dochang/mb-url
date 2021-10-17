@@ -176,9 +176,9 @@ Access-Control-Allow-Credentials: true
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
-        (mapc (lambda (backend)
-                (let* ((mb-url-http-backend backend)
-                       (url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix))
+        (mapc (lambda (mb-url-http-backend)
+                ;; GET
+                (let* ((url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix))
                        (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer
                     (goto-char (point-min))
@@ -190,7 +190,25 @@ Access-Control-Allow-Credentials: true
                                "application/json"))
                       (should (string=
                                (assoc-default 'foo (assoc-default 'args json))
-                               "bar"))))))
+                               "bar")))))
+                ;; POST with request data
+                (let* ((url (format "%s/post" mb-url-test--httpbin-prefix))
+                       (url-request-method "POST")
+                       (url-request-extra-headers '(("Content-Type" . "text/plain")))
+                       (url-request-data "foobar")
+                       (buffer (url-retrieve-synchronously url t t)))
+                  (with-current-buffer buffer
+                    (goto-char (point-min))
+                    (let* ((resp (mb-url-test-parse-response))
+                           (json (mb-url-test-response-json resp)))
+                      (should (= (mb-url-test-response-status-code resp) 200))
+                      (should (string=
+                               (mb-url-test-response-header "Content-Type" resp)
+                               "application/json"))
+                      (should (string=
+                               (assoc-default 'Content-Type (assoc-default 'headers json))
+                               "text/plain"))
+                      (should (string= (assoc-default 'data json) url-request-data))))))
               (list 'mb-url-http-curl
                     #'mb-url-http-curl
                     'mb-url-http-httpie
