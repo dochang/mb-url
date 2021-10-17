@@ -111,11 +111,11 @@ EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
       (mb-url-http--delete-carriage-return (current-buffer))
-      (let ((url-http-end-of-headers
-             (save-excursion
-               (goto-char (point-min))
-               (re-search-forward "\n\n" nil t))))
-        (url-http-end-of-document-sentinel proc evt)))))
+      (setq url-http-end-of-headers
+            (save-excursion
+              (goto-char (point-min))
+              (re-search-forward "\n\n" nil t)))
+      (url-http-end-of-document-sentinel proc evt))))
 
 (defun mb-url-http-header-field-to-argument (header)
   "Convert HEADER to command line arguments."
