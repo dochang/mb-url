@@ -244,9 +244,7 @@ Pass NAME, BUFFER, COMMAND and SENTINEL to `make-process' as is."
     ,@(if (string= "HEAD" url-request-method)
           (list "--head")
         (list "--request" url-request-method))
-    ,@(if (mb-url-string-empty-p url-request-data)
-          '()
-        (list "--data-binary" "@-"))
+    "--data-binary" "@-"
     ,@(apply #'append
              (mapcar (lambda (arg) (list "--header" arg))
                      (mapcar #'mb-url-http-header-field-to-argument
