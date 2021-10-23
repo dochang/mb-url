@@ -224,7 +224,7 @@ Pass NAME, BUFFER, COMMAND and SENTINEL to `start-process' as is."
 (defun mb-url-http--curl-command-list (url)
   "Return curl command list for URL."
   `(,mb-url-http-curl-program
-    "--silent" "--include" "--fail" "--show-error"
+    "--silent" "--include"
     ,@(if (string= "HEAD" url-request-method)
           (list "--head")
         (list "--request" url-request-method))
