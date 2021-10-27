@@ -40,6 +40,27 @@
                  (const :tag "None" nil))
   :group 'mb-url)
 
+;; TODO Add test code
+(defcustom mb-url-http-stderr nil
+  "Where the process writes the standard error to.
+
+nil means the process writes the standard error to the \"*Messages*\" buffer.
+
+t means mb-url creates a new buffer for every process.
+
+A string means the process writes the standard error to the buffer named by the
+string (create if not exists).
+
+A function means the process writes the standard error to the return value of
+that function.  The function must return a buffer, a pipe process or a
+string (buffer name)."
+  :type '(choice (const :tag "The \"*Messages*\" buffer" nil)
+                 (const :tag "Create new buffer every time" t)
+                 (string :tag "Buffer Name")
+                 (symbol :tag "Function name")
+                 (function :tag "Function"))
+  :group 'mb-url)
+
 (defun mb-url-http--goto-next-body ()
   "Goto next part of body."
   (re-search-forward "^\r?\n"))
@@ -223,15 +244,33 @@ CBARGS, RETRY-BUFFER and REST-ARGS are arguments for FN."
            (apply callback args))
          cbargs retry-buffer rest-args))
 
-(defun mb-url-http-make-pipe-process (name buffer command &optional sentinel)
+(defun mb-url-http--stderr-buffer-name (url)
+  "Generate process stderr buffer name based on URL."
+  (format "*mb-url-http-%s-%s-ERROR*" url-request-method (url-recreate-url url)))
+
+(defun mb-url-http-make-pipe-process (url name buffer command &optional sentinel)
   "Make a pipe process.
 
-Pass NAME, BUFFER, COMMAND and SENTINEL to `make-process' as is."
-  (let ((proc (make-process :name name
-                            :buffer buffer
-                            :command command
-                            :connection-type 'pipe
-                            :sentinel (or sentinel #'mb-url-http-sentinel))))
+URL is used to create the process stderr buffer if needed.
+
+Pass NAME, BUFFER, COMMAND and SENTINEL to `make-process' as is.
+
+If SENTINEL is nil, `mb-url-http-sentinel' will be used."
+  (let* ((stderr (cond ((null mb-url-http-stderr)
+                        (messages-buffer))
+                       ((eq mb-url-http-stderr t)
+                        (mb-url-http--stderr-buffer-name url))
+                       ((or (symbolp mb-url-http-stderr)
+                            (functionp mb-url-http-stderr))
+                        (funcall mb-url-http-stderr url))
+                       (t
+                        mb-url-http-stderr)))
+         (proc (make-process :name name
+                             :buffer buffer
+                             :command command
+                             :connection-type 'pipe
+                             :stderr stderr
+                             :sentinel (or sentinel #'mb-url-http-sentinel))))
     (mb-url-http-process-send-url-request-data proc)
     proc))
 
@@ -249,7 +288,7 @@ Pass NAME, BUFFER, COMMAND and SENTINEL to `make-process' as is."
 (defun mb-url-http--curl-command-list (url)
   "Return curl command list for URL."
   `(,mb-url-http-curl-program
-    "--silent" "--include"
+    "--silent" "--show-error" "--include"
     ,@(if (string= "HEAD" url-request-method)
           (list "--head")
         (list "--request" url-request-method))
@@ -289,7 +328,7 @@ BUFFER is the process buffer.
 DEFAULT-SENTINEL is the default sentinel of mb-url.  But curl backend uses its
 own sentinel instead."
   (mb-url-http-make-pipe-process
-   name buffer
+   url name buffer
    (mb-url-http--curl-command-list url)
    #'mb-url-http-sentinel--curl))
 
@@ -325,7 +364,7 @@ BUFFER is the process buffer.
 
 DEFAULT-SENTINEL is the default sentinel of mb-url."
   (mb-url-http-make-pipe-process
-   name buffer
+   url name buffer
    (mb-url-http--httpie-command-list url)
    default-sentinel))
 
