@@ -9,6 +9,8 @@
 
 (eldev-add-extra-dependencies
  'test
- 's)
+ 's
+ 'ert-async
+ 'promise)
 
 (setq eldev-lint-disabled '(package))
