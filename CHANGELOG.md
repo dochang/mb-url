@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+- Allow the process displays the error messages in a buffer
+
 ### Changed ###
 
 - Create process by `make-process` instead of `start-process`
