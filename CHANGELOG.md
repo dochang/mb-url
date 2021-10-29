@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.8.0] - 2021-10-29 ##
+
 ### Added ###
 
 - Allow the process displays the error messages in a buffer
@@ -190,7 +192,8 @@
 <!-- Skip checking the links status because the CHANGELOG is always updated
 before the tag is created -->
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/dochang/mb-url/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/dochang/mb-url/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/dochang/mb-url/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/dochang/mb-url/compare/0.5.1...0.6.0
