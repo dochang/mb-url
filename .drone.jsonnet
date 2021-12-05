@@ -26,7 +26,7 @@ local test_step(ci_deps_cmds) = function(emacs_ver) {
     steps: [
       {
         name: 'Lint',
-        image: 'nvuillam/mega-linter:v4',
+        image: 'megalinter/megalinter:v5',
         environment: {
           DEFAULT_WORKSPACE: '/drone/src',
         },

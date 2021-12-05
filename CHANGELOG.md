@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+- Migrate MegaLinter to v5
+
 ## [0.8.0] - 2021-10-29 ##
 
 ### Added ###

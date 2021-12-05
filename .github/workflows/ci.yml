@@ -14,11 +14,11 @@ jobs:
       - name: Mega-Linter
         id: ml
         # You can override Mega-Linter flavor used to have faster performances
-        # More info at https://nvuillam.github.io/mega-linter/flavors/
-        uses: nvuillam/mega-linter@v4
+        # More info at https://megalinter.github.io/flavors/
+        uses: megalinter/megalinter@v5
         env:
           # All available variables are described in documentation
-          # https://nvuillam.github.io/mega-linter/configuration/
+          # https://megalinter.github.io/configuration/
           VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

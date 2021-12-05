@@ -7,7 +7,7 @@
          "environment": {
             "DEFAULT_WORKSPACE": "/drone/src"
          },
-         "image": "nvuillam/mega-linter:v4",
+         "image": "megalinter/megalinter:v5",
          "name": "Lint"
       }
    ],
