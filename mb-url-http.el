@@ -149,6 +149,24 @@ EVT describes the type of event."
           (t
            (format "%s:%s" name value)))))
 
+(defun mb-url-http-headers-list ()
+  (let ((extra-headers (mapcar #'mb-url-http-header-field-to-argument
+                               url-request-extra-headers))
+        (var-headers `(("Extension" . ,url-extensions-header)
+                       ("From" . ,url-personal-mail-address)
+                       ("Accept-charset" . ,url-mime-charset-string)
+                       ("Accept-language" . ,url-mime-language-string)
+                       ("Accept" . ,url-mime-accept-string))))
+    (dolist (vh var-headers)
+      (when-let* ((value (cdr vh)))
+        (let* ((name (car vh))
+               (header (format "%s:%s" name
+                               (if (eq "Accept-charset" name)
+                                   (url-http--encode-string value)
+                                 value))))
+          (push header extra-headers))))
+    extra-headers))
+
 (defun mb-url-http-process-send-url-request-data (proc)
   "Send request data, in binary form, to PROC."
   (unless (mb-url-string-empty-p url-request-data)
@@ -170,6 +188,7 @@ of `url-http'."
   (let* ((url-request-method (or url-request-method "GET"))
          (name (mb-url-http--generate-name url))
          (buf (generate-new-buffer name))
+         (mime-accept-string url-mime-accept-string)
          (proc (funcall mb-url-http-backend
                         name url buf #'mb-url-http-sentinel)))
     ;; stuff ripped out of url-http
@@ -193,14 +212,18 @@ of `url-http'."
                      url-http-process
                      url-http-method
                      url-http-extra-headers
+                     url-http-noninteractive
                      url-http-data
                      url-http-target-url
                      url-http-no-retry
                      url-http-connection-opened
-                     url-http-proxy))
+                     url-mime-accept-string
+                     url-http-proxy
+                     url-http-referer))
         (set (make-local-variable var) nil))
       (setq url-http-method url-request-method
             url-http-extra-headers url-request-extra-headers
+	        url-http-noninteractive url-request-noninteractive
             url-http-data url-request-data
             ;; `url-http' will close the connection if:
             ;;
@@ -219,6 +242,7 @@ of `url-http'."
             url-http-target-url url-current-object
             url-http-no-retry retry-buffer
             url-http-connection-opened nil
+            url-mime-accept-string mime-accept-string
             url-http-proxy url-using-proxy))
     buf))
 
@@ -295,8 +319,7 @@ If SENTINEL is nil, `mb-url-http-sentinel' will be used."
     "--data-binary" "@-"
     ,@(apply #'append
              (mapcar (lambda (arg) (list "--header" arg))
-                     (mapcar #'mb-url-http-header-field-to-argument
-                             url-request-extra-headers)))
+                     (mb-url-http-headers-list)))
     ,(url-recreate-url url)
     ,@mb-url-http-curl-switches))
 
@@ -348,8 +371,7 @@ own sentinel instead."
   `(,mb-url-http-httpie-program
     "--print" "hb" "--pretty" "none"
     ,url-request-method ,(url-recreate-url url)
-    ,@(mapcar #'mb-url-http-header-field-to-argument
-              url-request-extra-headers)
+    ,@(mb-url-http-headers-list)
     ,@mb-url-http-httpie-switches))
 
 ;;;###autoload
