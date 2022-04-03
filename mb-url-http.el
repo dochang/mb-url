@@ -150,6 +150,7 @@ EVT describes the type of event."
            (format "%s:%s" name value)))))
 
 (defun mb-url-http-headers-list ()
+  "Convert `url-http' related headers into command list arguments."
   (let ((extra-headers (mapcar #'mb-url-http-header-field-to-argument
                                url-request-extra-headers))
         (var-headers `(("Extension" . ,url-extensions-header)
