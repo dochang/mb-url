@@ -1,6 +1,7 @@
 name: CI
 on:
   - push
+  - pull_request
 env:
   GUIX_PACK_CACHE: /opt/guix-pack.tar.gz
   GUIX_PACK_ROOT: /opt/guix
