@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+- Test for Emacs 28.1
+
 ### Changed ###
 
 - Run GitHub Actions on pull_request
