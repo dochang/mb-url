@@ -207,6 +207,8 @@ of `url-http'."
          (nsm-noninteractive (or url-request-noninteractive
                                  (and (boundp 'url-http-noninteractive)
                                       url-http-noninteractive)))
+         (referer (and (fboundp 'url-http--get-referer)
+                       (url-http--encode-string (url-http--get-referer url))))
          (proc (funcall mb-url-http-backend
                         name url buf #'mb-url-http-sentinel)))
     ;; stuff ripped out of url-http
@@ -236,7 +238,8 @@ of `url-http'."
                      url-http-no-retry
                      url-http-connection-opened
                      url-mime-accept-string
-                     url-http-proxy))
+                     url-http-proxy
+                     url-http-referer))
         (set (make-local-variable var) nil))
       (setq url-http-method url-request-method
             url-http-extra-headers url-request-extra-headers
@@ -260,7 +263,8 @@ of `url-http'."
             url-http-no-retry retry-buffer
             url-http-connection-opened nil
             url-mime-accept-string mime-accept-string
-            url-http-proxy url-using-proxy))
+            url-http-proxy url-using-proxy
+            url-http-referer referer))
     buf))
 
 ;;;###autoload

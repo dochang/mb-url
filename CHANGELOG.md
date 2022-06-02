@@ -19,6 +19,7 @@
 - Edit process buffer in place to avoid multibyte flag resetting
 - Allow binding `url-mime-accept-string`
 - Respect `url-request-noninteractive`
+- Support `url-http-referer`
 
 ## [0.9.0] - 2021-12-05 ##
 
