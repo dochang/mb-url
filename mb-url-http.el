@@ -182,6 +182,66 @@ EVT describes the type of event."
           (t
            (format "%s:%s" name value)))))
 
+(defun mb-url-http-extra-headers (url)
+  "Get extra HTTP headers for URL."
+  (let ((no-cache (cdr-safe (assoc "Pragma" url-request-extra-headers)))
+        (proxy-auth (if (or (cdr-safe (assoc "Proxy-Authorization" url-request-extra-headers))
+                            (not url-using-proxy))
+                        nil
+                      (let ((url-basic-auth-storage 'url-http-proxy-basic-auth-storage))
+                        (url-get-authentication url-using-proxy nil 'any nil))))
+        (real-fname (url-filename url))
+        (host (url-host url))
+        (auth (if (cdr-safe (assoc "Authorization" url-request-extra-headers))
+                  nil
+                (url-get-authentication (or (and (boundp 'proxy-info)
+                                                 proxy-info)
+                                            url) nil 'any nil)))
+        (ref-url (and (fboundp 'url-http--get-referer)
+                      (url-http--encode-string (url-http--get-referer url)))))
+    (if (equal "" real-fname)
+        (setq real-fname "/"))
+    (setq no-cache (and no-cache (string-match "no-cache" no-cache)))
+    (append
+     (seq-filter (lambda (header)
+                   (and (not (assoc-string (car header) url-request-extra-headers t))
+                        (cdr header)))
+                 (list
+                  (cons "From" url-personal-mail-address)
+                  (cons "Accept-Encoding" url-mime-encoding-string)
+                  (cons "Accept-Charset" (and url-mime-charset-string
+                                              (url-http--encode-string url-mime-charset-string)))
+                  (cons "Accept-Language" url-mime-language-string)
+                  (cons "Accept" (or url-mime-accept-string "*/*"))
+                  (cons "Proxy-Authorization" proxy-auth)
+                  (cons "Authorization" auth)
+                  (cons "If-Modified-Since" (and (not no-cache)
+                                                 (member url-request-method '("GET" nil))
+                                                 (let ((tm (url-is-cached url)))
+                                                   (and tm
+                                                        (url-get-normalized-date tm)))))
+                  (cons "Referer" ref-url)
+                  (cons "Content-Length" (and url-request-data
+                                              (number-to-string
+                                               (string-bytes url-request-data))))))
+     (when (and (url-use-cookies url)
+                (assoc-string "Cookie" url-request-extra-headers t))
+       (mapcar (lambda (line)
+                 (with-temp-buffer
+                   (insert line)
+                   (goto-char (point-min))
+                   (search-forward "Cookie: ")
+                   (replace-match "")
+                   (cons "Cookie" (buffer-string))))
+               (split-string
+                (url-http--encode-string
+                 (url-cookie-generate-header-lines
+                  host real-fname
+                  (equal "https" (url-type url))))
+                "\r\n"
+                t)))
+     url-request-extra-headers)))
+
 (defun mb-url-http-process-send-url-request-data (proc)
   "Send request data, in binary form, to PROC."
   (unless (mb-url-string-empty-p url-request-data)
@@ -341,7 +401,7 @@ If SENTINEL is nil, `mb-url-http-sentinel' will be used."
     ,@(apply #'append
              (mapcar (lambda (arg) (list "--header" arg))
                      (mapcar #'mb-url-http-header-field-to-argument
-                             url-request-extra-headers)))
+                             (mb-url-http-extra-headers url))))
     ,(url-recreate-url url)
     ,@mb-url-http-curl-switches))
 
@@ -398,7 +458,7 @@ own sentinel instead."
     "--print" "hb" "--pretty" "none"
     ,url-request-method ,(url-recreate-url url)
     ,@(mapcar #'mb-url-http-header-field-to-argument
-              url-request-extra-headers)
+              (mb-url-http-extra-headers url))
     ,@mb-url-http-httpie-switches))
 
 (defcustom mb-url-http-httpie-supported-content-encoding-list '("gzip" "deflate")

@@ -21,6 +21,7 @@
 - Allow binding `url-mime-accept-string`
 - Respect `url-request-noninteractive`
 - Support `url-http-referer`
+- Send extra headers based on Emacs variables
 
 ## [0.9.0] - 2021-12-05 ##
 
