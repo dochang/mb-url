@@ -204,6 +204,9 @@ of `url-http'."
          (name (mb-url-http--generate-name url))
          (buf (generate-new-buffer name))
          (mime-accept-string url-mime-accept-string)
+         (nsm-noninteractive (or url-request-noninteractive
+                                 (and (boundp 'url-http-noninteractive)
+                                      url-http-noninteractive)))
          (proc (funcall mb-url-http-backend
                         name url buf #'mb-url-http-sentinel)))
     ;; stuff ripped out of url-http
@@ -227,6 +230,7 @@ of `url-http'."
                      url-http-process
                      url-http-method
                      url-http-extra-headers
+                     url-http-noninteractive
                      url-http-data
                      url-http-target-url
                      url-http-no-retry
@@ -236,6 +240,7 @@ of `url-http'."
         (set (make-local-variable var) nil))
       (setq url-http-method url-request-method
             url-http-extra-headers url-request-extra-headers
+            url-http-noninteractive url-request-noninteractive
             url-http-data url-request-data
             ;; `url-http' will close the connection if:
             ;;
