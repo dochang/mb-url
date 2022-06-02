@@ -17,6 +17,7 @@
 
 - Replace `cl` with `cl-lib`
 - Edit process buffer in place to avoid multibyte flag resetting
+- Allow binding `url-mime-accept-string`
 
 ## [0.9.0] - 2021-12-05 ##
 

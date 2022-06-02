@@ -203,6 +203,7 @@ of `url-http'."
   (let* ((url-request-method (or url-request-method "GET"))
          (name (mb-url-http--generate-name url))
          (buf (generate-new-buffer name))
+         (mime-accept-string url-mime-accept-string)
          (proc (funcall mb-url-http-backend
                         name url buf #'mb-url-http-sentinel)))
     ;; stuff ripped out of url-http
@@ -230,6 +231,7 @@ of `url-http'."
                      url-http-target-url
                      url-http-no-retry
                      url-http-connection-opened
+                     url-mime-accept-string
                      url-http-proxy))
         (set (make-local-variable var) nil))
       (setq url-http-method url-request-method
@@ -252,6 +254,7 @@ of `url-http'."
             url-http-target-url url-current-object
             url-http-no-retry retry-buffer
             url-http-connection-opened nil
+            url-mime-accept-string mime-accept-string
             url-http-proxy url-using-proxy))
     buf))
 
