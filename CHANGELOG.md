@@ -7,6 +7,7 @@
 - Test for Emacs 28.1
 - HTTPie sentinel
 - Custom variables for deleting HTTPie supported content encodings
+- Test cases for url-http variables
 
 ### Changed ###
 

@@ -202,6 +202,28 @@ Access-Control-Allow-Credentials: true
                      (lambda (args) t)
                      "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
 
+(ert-deftest mb-url-test-034-http--url-http-variables ()
+  (mapc (lambda (case)
+          (cl-destructuring-bind
+              (mime-accept-string request-noninteractive current-lastloc url-string)
+              case
+            (let* ((mb-url-http-backend (lambda (&rest args) nil))
+                   (url-privacy-level 'none)
+                   (url-lastloc-privacy-level 'none)
+                   (url-mime-accept-string mime-accept-string)
+                   (url-request-noninteractive request-noninteractive)
+                   (url-current-lastloc current-lastloc)
+                   (url (url-generic-parse-url url-string))
+                   (buf (mb-url-http url nil nil nil nil)))
+              (with-current-buffer buf
+                (should (string= url-mime-accept-string mime-accept-string))
+                (should (string= url-request-noninteractive request-noninteractive))
+                (should (string= url-http-referer (if (fboundp 'url-http--get-referer)
+                                                      current-lastloc
+                                                    nil))))
+              (kill-buffer buf))))
+        '(("*/*" t "http://foo/a" "http://foo/b"))))
+
 (ert-deftest mb-url-test-050-http ()
   (unwind-protect
       (progn
