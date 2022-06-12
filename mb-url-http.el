@@ -452,13 +452,23 @@ own sentinel instead."
   :type '(repeat (string))
   :group 'mb-url)
 
+(defun mb-url-http--httpie-extra-headers (url)
+  "Get extra HTTP headers for URL.
+
+Remove internal headers for HTTPie from the headers."
+  (seq-remove (lambda (pair)
+                (member (car-safe pair)
+                        ;; https://httpie.io/docs/cli/redirected-input
+                        '("Content-Length")))
+              (mb-url-http-extra-headers url)))
+
 (defun mb-url-http--httpie-command-list (url)
   "Return httpie command list for URL."
   `(,mb-url-http-httpie-program
     "--print" "hb" "--pretty" "none"
     ,url-request-method ,(url-recreate-url url)
     ,@(mapcar #'mb-url-http-header-field-to-argument
-              (mb-url-http-extra-headers url))
+              (mb-url-http--httpie-extra-headers url))
     ,@mb-url-http-httpie-switches))
 
 (defcustom mb-url-http-httpie-supported-content-encoding-list '("gzip" "deflate")

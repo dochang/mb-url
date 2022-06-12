@@ -22,6 +22,7 @@
 - Respect `url-request-noninteractive`
 - Support `url-http-referer`
 - Send extra headers based on Emacs variables
+- Remove internal headers for HTTPie from headers
 
 ## [0.9.0] - 2021-12-05 ##
 
