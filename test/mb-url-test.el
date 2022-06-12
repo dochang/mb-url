@@ -28,7 +28,7 @@
 ;;; Code:
 
 (require 'ert)
-(require 'cl)
+(require 'cl-lib)
 (require 'json)
 (require 'url)
 (require 'url-http)

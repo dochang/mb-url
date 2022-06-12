@@ -10,6 +10,10 @@
 
 - Run GitHub Actions on pull_request
 
+### Fixed ###
+
+- Replace `cl` with `cl-lib`
+
 ## [0.9.0] - 2021-12-05 ##
 
 ### Changed ###
