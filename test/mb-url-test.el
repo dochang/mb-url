@@ -271,6 +271,28 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
+(ert-deftest mb-url-test-053-sentinel-zlib-unibyte ()
+  (unwind-protect
+      (progn
+        (advice-add 'url-http :around 'mb-url-http-around-advice)
+        (mapc (lambda (backend)
+                (let* ((mb-url-http-backend backend)
+                       (url (format "%s/gzip" mb-url-test--httpbin-prefix))
+                       (url-request-method "GET")
+                       (buffer (url-retrieve-synchronously url t t)))
+                  (with-current-buffer buffer
+                    (goto-char (point-min))
+                    (let* ((resp (mb-url-test-parse-response))
+                           (json (mb-url-test-response-json resp)))
+                      (should (= (mb-url-test-response-status-code resp) 200))
+                      (should (equal (mb-url-test-response-header "Content-Encoding" resp) "gzip"))
+                      (should (assoc-default 'gzipped json))))))
+              (list 'mb-url-http-curl
+                    #'mb-url-http-curl
+                    'mb-url-http-httpie
+                    #'mb-url-http-httpie)))
+    (advice-remove 'url-http 'mb-url-http-around-advice)))
+
 (provide 'mb-url-test)
 
 ;;; mb-url-test.el ends here
