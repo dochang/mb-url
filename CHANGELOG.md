@@ -13,6 +13,7 @@
 ### Fixed ###
 
 - Replace `cl` with `cl-lib`
+- Edit process buffer in place to avoid multibyte flag resetting
 
 ## [0.9.0] - 2021-12-05 ##
 

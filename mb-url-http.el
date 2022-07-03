@@ -95,32 +95,27 @@ This function deletes the first block (from proxy)."
 (defun mb-url-http--delete-carriage-return (buffer)
   "Delete carriage return from the header part in BUFFER."
   (with-current-buffer buffer
-    (let* ((rnrn-end-of-headers
-            (save-excursion
-              (goto-char (point-min))
-              (re-search-forward "\r\n\r\n" nil t)))
-           (nn-end-of-headers
-            (save-excursion
-              (goto-char (point-min))
-              (re-search-forward "\n\n" nil t)))
-           (end-of-headers (cond ((not nn-end-of-headers)
-                                  rnrn-end-of-headers)
-                                 ((not rnrn-end-of-headers)
-                                  nil)
-                                 ((< rnrn-end-of-headers nn-end-of-headers)
-                                  rnrn-end-of-headers)))
-           (buf (current-buffer)))
-      (when end-of-headers
-        (with-temp-buffer
-          (insert-buffer-substring buf nil end-of-headers)
-          (goto-char (point-min))
-          (while (re-search-forward "\r\n" nil t)
-            (replace-match "\n"))
-          (let ((hdr-buf (current-buffer)))
-            (with-temp-buffer
-              (insert-buffer-substring hdr-buf)
-              (insert-buffer-substring buf end-of-headers nil)
-              (buffer-swap-text buf)))))))
+    (save-excursion
+      (let* (rnrn-end-of-headers
+             nn-end-of-headers
+             end-of-headers)
+        (goto-char (point-min))
+        (setq rnrn-end-of-headers (re-search-forward "\r\n\r\n" nil t))
+        (goto-char (point-min))
+        (setq nn-end-of-headers (re-search-forward "\n\n" nil t))
+        (setq end-of-headers
+              (cond ((not nn-end-of-headers)
+                     rnrn-end-of-headers)
+                    ((not rnrn-end-of-headers)
+                     nil)
+                    ((< rnrn-end-of-headers nn-end-of-headers)
+                     rnrn-end-of-headers)))
+        (when end-of-headers
+          (save-restriction
+            (narrow-to-region (point-min) end-of-headers)
+            (goto-char (point-min))
+            (while (re-search-forward "\r\n" nil t)
+              (replace-match "\n")))))))
   buffer)
 
 (defun mb-url-http-sentinel (proc evt)
