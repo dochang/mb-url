@@ -53,7 +53,7 @@
   raw-string version status-code headers body json)
 
 (defun mb-url-test-response-header (field-name response)
-  (cdr (assoc-string field-name (mb-url-test-response-headers response) t)))
+  (cdr-safe (assoc-string field-name (mb-url-test-response-headers response) t)))
 
 (defun mb-url-test-parse-response (&optional buffer)
   (unless buffer
@@ -78,8 +78,8 @@
         (re-search-forward "^\n")
         (setf (mb-url-test-response-body resp)
               (buffer-substring (point) (point-max)))
-        (when (string= "application/json"
-                       (mb-url-test-response-header "Content-Type" resp))
+        (when (equal "application/json"
+                     (mb-url-test-response-header "Content-Type" resp))
           (setf (mb-url-test-response-json resp)
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
@@ -113,11 +113,11 @@ Access-Control-Allow-Credentials: true
         (should (string= (mb-url-test-response-raw-string resp) raw-string))
         (should (string= (mb-url-test-response-version resp) "1.1"))
         (should (= (mb-url-test-response-status-code resp) 200))
-        (should (string= (mb-url-test-response-header "Content-Length" resp)
-                         "230"))
+        (should (equal (mb-url-test-response-header "Content-Length" resp)
+                       "230"))
         (should (string= (mb-url-test-response-body resp) body))
-        (should (string= (assoc-default 'url (mb-url-test-response-json resp))
-                         "https://httpbin.org/get"))))))
+        (should (equal (assoc-default 'url (mb-url-test-response-json resp))
+                       "https://httpbin.org/get"))))))
 
 (ert-deftest mb-url-test-010-header-field-to-argument ()
   (mapc (lambda (case)
@@ -176,39 +176,40 @@ Access-Control-Allow-Credentials: true
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
-        (mapc (lambda (mb-url-http-backend)
-                ;; GET
-                (let* ((url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix))
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (with-current-buffer buffer
-                    (goto-char (point-min))
-                    (let* ((resp (mb-url-test-parse-response))
-                           (json (mb-url-test-response-json resp)))
-                      (should (= (mb-url-test-response-status-code resp) 200))
-                      (should (string=
-                               (mb-url-test-response-header "Content-Type" resp)
-                               "application/json"))
-                      (should (string=
-                               (assoc-default 'foo (assoc-default 'args json))
-                               "bar")))))
-                ;; POST with request data
-                (let* ((url (format "%s/post" mb-url-test--httpbin-prefix))
-                       (url-request-method "POST")
-                       (url-request-extra-headers '(("Content-Type" . "text/plain")))
-                       (url-request-data "foobar")
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (with-current-buffer buffer
-                    (goto-char (point-min))
-                    (let* ((resp (mb-url-test-parse-response))
-                           (json (mb-url-test-response-json resp)))
-                      (should (= (mb-url-test-response-status-code resp) 200))
-                      (should (string=
-                               (mb-url-test-response-header "Content-Type" resp)
-                               "application/json"))
-                      (should (string=
-                               (assoc-default 'Content-Type (assoc-default 'headers json))
-                               "text/plain"))
-                      (should (string= (assoc-default 'data json) url-request-data))))))
+        (mapc (lambda (backend)
+                (let ((mb-url-http-backend backend))
+                  ;; GET
+                  (let* ((url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix))
+                         (buffer (url-retrieve-synchronously url t t)))
+                    (with-current-buffer buffer
+                      (goto-char (point-min))
+                      (let* ((resp (mb-url-test-parse-response))
+                             (json (mb-url-test-response-json resp)))
+                        (should (= (mb-url-test-response-status-code resp) 200))
+                        (should (equal
+                                 (mb-url-test-response-header "Content-Type" resp)
+                                 "application/json"))
+                        (should (equal
+                                 (assoc-default 'foo (assoc-default 'args json))
+                                 "bar")))))
+                  ;; POST with request data
+                  (let* ((url (format "%s/post" mb-url-test--httpbin-prefix))
+                         (url-request-method "POST")
+                         (url-request-extra-headers '(("Content-Type" . "text/plain")))
+                         (url-request-data "foobar")
+                         (buffer (url-retrieve-synchronously url t t)))
+                    (with-current-buffer buffer
+                      (goto-char (point-min))
+                      (let* ((resp (mb-url-test-parse-response))
+                             (json (mb-url-test-response-json resp)))
+                        (should (= (mb-url-test-response-status-code resp) 200))
+                        (should (equal
+                                 (mb-url-test-response-header "Content-Type" resp)
+                                 "application/json"))
+                        (should (equal
+                                 (assoc-default 'Content-Type (assoc-default 'headers json))
+                                 "text/plain"))
+                        (should (equal (assoc-default 'data json) url-request-data)))))))
               (list 'mb-url-http-curl
                     #'mb-url-http-curl
                     'mb-url-http-httpie
@@ -261,9 +262,9 @@ Access-Control-Allow-Credentials: true
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
                       (should (= (mb-url-test-response-status-code resp) 200))
-                      (should (string= (mb-url-test-response-header "Content-Type" resp) "application/json"))
-                      (should (string= (assoc-default 'Content-Type (assoc-default 'headers json)) "text/plain"))
-                      (should (string= (assoc-default 'data json) url-request-data))))))
+                      (should (equal (mb-url-test-response-header "Content-Type" resp) "application/json"))
+                      (should (equal (assoc-default 'Content-Type (assoc-default 'headers json)) "text/plain"))
+                      (should (equal (assoc-default 'data json) url-request-data))))))
               (list 'mb-url-http-curl
                     #'mb-url-http-curl
                     'mb-url-http-httpie
