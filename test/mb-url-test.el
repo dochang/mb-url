@@ -55,7 +55,7 @@
 (defun mb-url-test-response-header (field-name response)
   (cdr-safe (assoc-string field-name (mb-url-test-response-headers response) t)))
 
-(defun mb-url-test-parse-response (&optional buffer)
+(defun mb-url-test-parse-response (&optional buffer skip-json)
   (unless buffer
     (setq buffer (current-buffer)))
   (let ((resp (mb-url-test-make-response)))
@@ -78,8 +78,9 @@
         (re-search-forward "^\n")
         (setf (mb-url-test-response-body resp)
               (buffer-substring (point) (point-max)))
-        (when (equal "application/json"
-                     (mb-url-test-response-header "Content-Type" resp))
+        (when (and (not skip-json)
+                   (equal "application/json"
+                          (mb-url-test-response-header "Content-Type" resp)))
           (setf (mb-url-test-response-json resp)
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
@@ -271,26 +272,41 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
+(defun mb-url-test--parse-response-before-url-http-parse-headers (&rest args)
+  (setq-local mb-url-test--raw-resp (mb-url-test-parse-response nil t))
+  ;; Skip json parsing.  The response body may be encoded before
+  ;; `url-http-parse-headers'.
+  (goto-char (point-min)))
+
 (ert-deftest mb-url-test-053-sentinel-zlib-unibyte ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
+        (advice-add 'url-http-parse-headers :before 'mb-url-test--parse-response-before-url-http-parse-headers)
+        ;; Starting from Emacs 27, `url-http-parse-headers' deletes some HTTP
+        ;; headers.  We have to parse the response before
+        ;; `url-http-parse-headers'.
+        ;;
+        ;; [1]: https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e310843d9dc106187d0e45ef7f0b9cd90a881eec
+        ;; [2]: https://github.com/emacs-mirror/emacs/commit/e310843d9dc106187d0e45ef7f0b9cd90a881eec
+        ;; [3]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=36773
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
                        (url (format "%s/gzip" mb-url-test--httpbin-prefix))
                        (url-request-method "GET")
                        (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer
-                    (goto-char (point-min))
-                    (let* ((resp (mb-url-test-parse-response))
+                    (let* ((raw-resp mb-url-test--raw-resp)
+                           (resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
-                      (should (= (mb-url-test-response-status-code resp) 200))
-                      (should (equal (mb-url-test-response-header "Content-Encoding" resp) "gzip"))
+                      (should (= (mb-url-test-response-status-code raw-resp) 200))
+                      (should (equal (mb-url-test-response-header "Content-Encoding" raw-resp) "gzip"))
                       (should (assoc-default 'gzipped json))))))
               (list 'mb-url-http-curl
                     #'mb-url-http-curl
                     'mb-url-http-httpie
                     #'mb-url-http-httpie)))
+    (advice-remove 'url-http-parse-headers 'mb-url-test--parse-response-before-url-http-parse-headers)
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
 (provide 'mb-url-test)
