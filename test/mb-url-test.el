@@ -319,8 +319,9 @@ Access-Control-Allow-Credentials: true
         ;; [1]: https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e310843d9dc106187d0e45ef7f0b9cd90a881eec
         ;; [2]: https://github.com/emacs-mirror/emacs/commit/e310843d9dc106187d0e45ef7f0b9cd90a881eec
         ;; [3]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=36773
-        (mapc (lambda (backend)
-                (let* ((mb-url-http-backend backend)
+        (mapc (lambda (args)
+                (let* ((mb-url-http-backend (if (consp args) (car args) args))
+                       (encoding-raw-value (if (consp args) (cadr args) nil))
                        (url (format "%s/gzip" mb-url-test--httpbin-prefix))
                        (url-request-method "GET")
                        (buffer (url-retrieve-synchronously url t t)))
@@ -329,12 +330,16 @@ Access-Control-Allow-Credentials: true
                            (resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
                       (should (= (mb-url-test-response-status-code raw-resp) 200))
-                      (should (equal (mb-url-test-response-header "Content-Encoding" raw-resp) "gzip"))
+                      (if (or (< emacs-major-version 27)
+                              encoding-raw-value)
+                          (should (equal (mb-url-test-response-header "Content-Encoding" raw-resp) "gzip"))
+                        (should (null (mb-url-test-response-header "Content-Encoding" raw-resp))))
                       (should (assoc-default 'gzipped json))))))
-              (list 'mb-url-http-curl
-                    #'mb-url-http-curl
-                    'mb-url-http-httpie
-                    #'mb-url-http-httpie)))
+              (list
+               (list 'mb-url-http-curl t)
+               (list #'mb-url-http-curl t)
+               'mb-url-http-httpie
+               #'mb-url-http-httpie)))
     (advice-remove 'url-http-parse-headers 'mb-url-test--parse-response-before-url-http-parse-headers)
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
