@@ -9,6 +9,7 @@
 ### Changed ###
 
 - Run GitHub Actions on pull_request
+- Modularize sentinels
 
 ### Fixed ###
 

@@ -166,7 +166,7 @@ Access-Control-Allow-Credentials: true
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
-              (mb-url-http--delete-carriage-return (current-buffer))
+              (mb-url-http--delete-carriage-return)
               (should (string= (buffer-string) after)))))
         '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
           ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")

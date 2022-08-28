@@ -89,34 +89,40 @@ This function deletes the first block (from proxy)."
   ;; [2]: http://ijbswa.cvs.sourceforge.net/viewvc/ijbswa/current/jcc.c?view=markup
   ;; [polipo]: https://github.com/jech/polipo/blob/master/tunnel.c#L302
   ;; [cow]: https://github.com/cyfdecyf/cow/blob/master/proxy.go#L1160
+  (goto-char (point-min))
   (when (looking-at-p "HTTP/[0-9]+\\.[0-9]+ 2[0-9][0-9] [^\r\n]* established\r?\n")
     (delete-region (point) (progn (mb-url-http--goto-next-body) (point)))))
 
-(defun mb-url-http--delete-carriage-return (buffer)
-  "Delete carriage return from the header part in BUFFER."
-  (with-current-buffer buffer
-    (save-excursion
-      (let* (rnrn-end-of-headers
-             nn-end-of-headers
-             end-of-headers)
-        (goto-char (point-min))
-        (setq rnrn-end-of-headers (re-search-forward "\r\n\r\n" nil t))
-        (goto-char (point-min))
-        (setq nn-end-of-headers (re-search-forward "\n\n" nil t))
-        (setq end-of-headers
-              (cond ((not nn-end-of-headers)
-                     rnrn-end-of-headers)
-                    ((not rnrn-end-of-headers)
-                     nil)
-                    ((< rnrn-end-of-headers nn-end-of-headers)
-                     rnrn-end-of-headers)))
-        (when end-of-headers
-          (save-restriction
-            (narrow-to-region (point-min) end-of-headers)
-            (goto-char (point-min))
-            (while (re-search-forward "\r\n" nil t)
-              (replace-match "\n")))))))
-  buffer)
+(defun mb-url-http--delete-carriage-return ()
+  "Delete carriage return from the header part."
+  (save-excursion
+    (let* (rnrn-end-of-headers
+           nn-end-of-headers
+           end-of-headers)
+      (goto-char (point-min))
+      (setq rnrn-end-of-headers (re-search-forward "\r\n\r\n" nil t))
+      (goto-char (point-min))
+      (setq nn-end-of-headers (re-search-forward "\n\n" nil t))
+      (setq end-of-headers
+            (cond ((not nn-end-of-headers)
+                   rnrn-end-of-headers)
+                  ((not rnrn-end-of-headers)
+                   nil)
+                  ((< rnrn-end-of-headers nn-end-of-headers)
+                   rnrn-end-of-headers)))
+      (when end-of-headers
+        (save-restriction
+          (narrow-to-region (point-min) end-of-headers)
+          (goto-char (point-min))
+          (while (re-search-forward "\r\n" nil t)
+            (replace-match "\n")))))))
+
+(defun mb-url-http--reset-end-of-headers ()
+  "Reset url-http-end-of-headers."
+  (setq url-http-end-of-headers
+        (save-excursion
+          (goto-char (point-min))
+          (re-search-forward "\n\n" nil t))))
 
 (defun mb-url-http-sentinel (proc evt)
   "Sentinel used to fix built-in sentinel.
@@ -126,11 +132,9 @@ PROC is the process.
 EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
-      (mb-url-http--delete-carriage-return (current-buffer))
-      (setq url-http-end-of-headers
-            (save-excursion
-              (goto-char (point-min))
-              (re-search-forward "\n\n" nil t)))
+      (mb-url-http--delete-carriage-return)
+      (mb-url-http--reset-end-of-headers)
+      (goto-char (point-min))
       (url-http-end-of-document-sentinel proc evt))))
 
 (defun mb-url-http-header-field-to-argument (header)
@@ -306,9 +310,11 @@ EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
       (save-excursion
+        (mb-url-http--delete-proxy-response)
+        (mb-url-http--delete-carriage-return)
+        (mb-url-http--reset-end-of-headers)
         (goto-char (point-min))
-        (mb-url-http--delete-proxy-response))))
-  (mb-url-http-sentinel proc evt))
+        (url-http-end-of-document-sentinel proc evt)))))
 
 ;;;###autoload
 (defun mb-url-http-curl (name url buffer default-sentinel)
