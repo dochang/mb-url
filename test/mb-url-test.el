@@ -173,6 +173,35 @@ Access-Control-Allow-Credentials: true
           ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n")
           ("HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
 
+(ert-deftest mb-url-test-033-http--fix-header ()
+  (mapc (lambda (case)
+          (let ((src (car case))
+                (fixes (cdr case)))
+            (mapc (lambda (fix)
+                    (let ((header (nth 0 fix))
+                          (fn (nth 1 fix))
+                          (expected (nth 2 fix)))
+                      (with-temp-buffer
+                        (insert src)
+                        (goto-char (point-min))
+                        (if (< emacs-major-version 27)
+                            (should-error
+                             (mb-url-http--fix-header header fn nil nil t))
+                          (mb-url-http--fix-header header fn nil nil t)
+                          (should (string= (buffer-string) expected))))))
+                  fixes)))
+        (list
+         (list "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n"
+               (list "Foo"
+                     (lambda (args) nil)
+                     "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\n\nbody...\n")
+               (list "Foo"
+                     (lambda (args) "0")
+                     "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\nFoo: 0\n\nbody...\n")
+               (list "Foo"
+                     (lambda (args) t)
+                     "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
+
 (ert-deftest mb-url-test-050-http ()
   (unwind-protect
       (progn
