@@ -326,7 +326,9 @@ Access-Control-Allow-Credentials: true
                        (url-request-method "GET")
                        (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer
-                    (let* ((raw-resp mb-url-test--raw-resp)
+                    (let* ((raw-resp (if (local-variable-p 'mb-url-test--raw-resp)
+                                         (buffer-local-value 'mb-url-test--raw-resp buffer)
+                                       (error "TIMEOUT")))
                            (resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
                       (should (= (mb-url-test-response-status-code raw-resp) 200))
