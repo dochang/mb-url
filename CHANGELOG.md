@@ -7,6 +7,7 @@
 - Test for Emacs 28.1
 - HTTPie sentinel
 - Custom variables for deleting HTTPie supported content encodings
+- Test cases for url-http variables
 
 ### Changed ###
 
@@ -17,6 +18,11 @@
 
 - Replace `cl` with `cl-lib`
 - Edit process buffer in place to avoid multibyte flag resetting
+- Allow binding `url-mime-accept-string`
+- Respect `url-request-noninteractive`
+- Support `url-http-referer`
+- Send extra headers based on Emacs variables
+- Remove internal headers for HTTPie from headers
 
 ## [0.9.0] - 2021-12-05 ##
 

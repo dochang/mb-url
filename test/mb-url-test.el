@@ -202,6 +202,60 @@ Access-Control-Allow-Credentials: true
                      (lambda (args) t)
                      "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
 
+(ert-deftest mb-url-test-034-http--url-http-variables ()
+  (mapc (lambda (case)
+          (cl-destructuring-bind
+              (mime-accept-string request-noninteractive current-lastloc url-string)
+              case
+            (let* ((mb-url-http-backend (lambda (&rest args) nil))
+                   (url-privacy-level 'none)
+                   (url-lastloc-privacy-level 'none)
+                   (url-mime-accept-string mime-accept-string)
+                   (url-request-noninteractive request-noninteractive)
+                   (url-current-lastloc current-lastloc)
+                   (url (url-generic-parse-url url-string))
+                   (buf (mb-url-http url nil nil nil nil)))
+              (with-current-buffer buf
+                (should (string= url-mime-accept-string mime-accept-string))
+                (should (string= url-request-noninteractive request-noninteractive))
+                (should (string= url-http-referer (if (fboundp 'url-http--get-referer)
+                                                      current-lastloc
+                                                    nil))))
+              (kill-buffer buf))))
+        '(("*/*" t "http://foo/a" "http://foo/b"))))
+
+(ert-deftest mb-url-test-034-http--extra-variables ()
+  (mapc (lambda (case)
+          (let* ((url-request-extra-headers case)
+                 (url-personal-mail-address "From*")
+                 (url-mime-encoding-string "Accept-Encoding*")
+                 (url-mime-charset-string "Accept-Charset*")
+                 (url-mime-language-string "Accept-Language*")
+                 (url-mime-accept-string "Accept*")
+                 (url-request-data "lorem ipsum")
+                 (headers (mb-url-http-extra-headers
+                           (url-generic-parse-url "http://foo/a")))
+                 (fn (lambda (v header)
+                       (let ((hv1 (cdr-safe (assoc-string header url-request-extra-headers t)))
+                             (hv2 (cdr-safe (assoc-string header headers t))))
+                         (cond ((and v (null hv1))
+                                (should (equal v hv2)))
+                               (t
+                                (should (equal hv1 hv2))))))))
+            (funcall fn url-personal-mail-address "From")
+            (funcall fn url-mime-encoding-string "Accept-Encoding")
+            (funcall fn url-mime-charset-string "Accept-Charset")
+            (funcall fn url-mime-language-string "Accept-Language")
+            (funcall fn url-mime-accept-string "Accept")
+            (funcall fn (number-to-string (length url-request-data)) "Content-Length")))
+        '(()
+          (("From" . "bar@foo.com")
+           ("Accept-Encoding" . "br;q=1.0, gzip;q=0.8, *;q=0.1")
+           ("Accept-Charset" . "utf-8, iso-8859-1;q=0.5, *;q=0.1")
+           ("Accept-Language" . "zh-CN,zh;q=0.8, en-US;q=0.3, en;q=0.2, *;q=0.1")
+           ("Accept" . "text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8")
+           ("Content-Length" . "42")))))
+
 (ert-deftest mb-url-test-050-http ()
   (unwind-protect
       (progn
