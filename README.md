@@ -1,7 +1,7 @@
 # mb-url - Multiple Backends for Emacs URL package
 
 *Author:* ZHANG Weiyi <dochang@gmail.com><br>
-*Version:* 0.9.0<br>
+*Version:* 0.10.0<br>
 *URL:* [https://github.com/dochang/mb-url](https://github.com/dochang/mb-url)<br>
 
 <!-- markdown-link-check-disable -->
