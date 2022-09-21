@@ -89,39 +89,74 @@ This function deletes the first block (from proxy)."
   ;; [2]: http://ijbswa.cvs.sourceforge.net/viewvc/ijbswa/current/jcc.c?view=markup
   ;; [polipo]: https://github.com/jech/polipo/blob/master/tunnel.c#L302
   ;; [cow]: https://github.com/cyfdecyf/cow/blob/master/proxy.go#L1160
+  (goto-char (point-min))
   (when (looking-at-p "HTTP/[0-9]+\\.[0-9]+ 2[0-9][0-9] [^\r\n]* established\r?\n")
     (delete-region (point) (progn (mb-url-http--goto-next-body) (point)))))
 
-(defun mb-url-http--delete-carriage-return (buffer)
-  "Delete carriage return from the header part in BUFFER."
-  (with-current-buffer buffer
-    (let* ((rnrn-end-of-headers
-            (save-excursion
-              (goto-char (point-min))
-              (re-search-forward "\r\n\r\n" nil t)))
-           (nn-end-of-headers
-            (save-excursion
-              (goto-char (point-min))
-              (re-search-forward "\n\n" nil t)))
-           (end-of-headers (cond ((not nn-end-of-headers)
-                                  rnrn-end-of-headers)
-                                 ((not rnrn-end-of-headers)
-                                  nil)
-                                 ((< rnrn-end-of-headers nn-end-of-headers)
-                                  rnrn-end-of-headers)))
-           (buf (current-buffer)))
+(defun mb-url-http--delete-carriage-return ()
+  "Delete carriage return from the header part."
+  (save-excursion
+    (let* (rnrn-end-of-headers
+           nn-end-of-headers
+           end-of-headers)
+      (goto-char (point-min))
+      (setq rnrn-end-of-headers (re-search-forward "\r\n\r\n" nil t))
+      (goto-char (point-min))
+      (setq nn-end-of-headers (re-search-forward "\n\n" nil t))
+      (setq end-of-headers
+            (cond ((not nn-end-of-headers)
+                   rnrn-end-of-headers)
+                  ((not rnrn-end-of-headers)
+                   nil)
+                  ((< rnrn-end-of-headers nn-end-of-headers)
+                   rnrn-end-of-headers)))
       (when end-of-headers
-        (with-temp-buffer
-          (insert-buffer-substring buf nil end-of-headers)
+        (save-restriction
+          (narrow-to-region (point-min) end-of-headers)
           (goto-char (point-min))
           (while (re-search-forward "\r\n" nil t)
-            (replace-match "\n"))
-          (let ((hdr-buf (current-buffer)))
-            (with-temp-buffer
-              (insert-buffer-substring hdr-buf)
-              (insert-buffer-substring buf end-of-headers nil)
-              (buffer-swap-text buf)))))))
-  buffer)
+            (replace-match "\n")))))))
+
+(defun mb-url-http--fix-header (header fix-function &optional last all list)
+  "Fix all HEADER lines from response message.
+
+FIX-FUNCTION should be a function of one argument.  It is called with header
+values as its argument and returns the new value of HEADER.  If it returns a
+string, the value of HEADER will be replaced with the string.  If it returns
+nil, all HEADER lines will be removed.  If it returns t, all HEADER lines
+keeps unchanged.
+
+LAST, ALL, LIST will be passed to `mail-fetch-field'.
+
+This function is only implemented in Emacs 27+."
+  (when (< emacs-major-version 27)
+    (error "Not implemented in Emacs %s" emacs-version))
+  (save-excursion
+    (save-restriction
+      (goto-char (point-min))
+      (and (not (buffer-narrowed-p))
+           (mail-narrow-to-head))
+      (goto-char (point-min))
+      (let* ((hvals (mail-fetch-field header last all list nil))
+             (fixed (funcall fix-function hvals)))
+        (cond ((eq fixed t))
+              ((null fixed)
+               (goto-char (point-min))
+               (mail-fetch-field header last all list t)
+               (flush-lines "^[ \t]*$" (point-min) (point-max)))
+              (t
+               (goto-char (point-min))
+               (mail-fetch-field header last all list t)
+               (flush-lines "^[ \t]*$" (point-min) (point-max))
+               (goto-char (point-max))
+               (insert (concat header ": " fixed "\n"))))))))
+
+(defun mb-url-http--reset-end-of-headers ()
+  "Reset url-http-end-of-headers."
+  (setq url-http-end-of-headers
+        (save-excursion
+          (goto-char (point-min))
+          (re-search-forward "\n\n" nil t))))
 
 (defun mb-url-http-sentinel (proc evt)
   "Sentinel used to fix built-in sentinel.
@@ -131,11 +166,9 @@ PROC is the process.
 EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
-      (mb-url-http--delete-carriage-return (current-buffer))
-      (setq url-http-end-of-headers
-            (save-excursion
-              (goto-char (point-min))
-              (re-search-forward "\n\n" nil t)))
+      (mb-url-http--delete-carriage-return)
+      (mb-url-http--reset-end-of-headers)
+      (goto-char (point-min))
       (url-http-end-of-document-sentinel proc evt))))
 
 (defun mb-url-http-header-field-to-argument (header)
@@ -301,7 +334,9 @@ If SENTINEL is nil, `mb-url-http-sentinel' will be used."
     ,@mb-url-http-curl-switches))
 
 (defun mb-url-http-sentinel--curl (proc evt)
-  "Curl return the proxy response before the actual remote server response.
+  "Sentinel for Curl.
+
+Curl return the proxy response before the actual remote server response.
 It makes Emacs hard to parse the response message.  Delete the proxy response
 first.
 
@@ -311,9 +346,11 @@ EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
       (save-excursion
+        (mb-url-http--delete-proxy-response)
+        (mb-url-http--delete-carriage-return)
+        (mb-url-http--reset-end-of-headers)
         (goto-char (point-min))
-        (mb-url-http--delete-proxy-response))))
-  (mb-url-http-sentinel proc evt))
+        (url-http-end-of-document-sentinel proc evt)))))
 
 ;;;###autoload
 (defun mb-url-http-curl (name url buffer default-sentinel)
@@ -352,6 +389,62 @@ own sentinel instead."
               url-request-extra-headers)
     ,@mb-url-http-httpie-switches))
 
+(defcustom mb-url-http-httpie-supported-content-encoding-list '("gzip" "deflate")
+  "Content encodings which HTTPie supports to decode.
+
+If your HTTPie supports to decode a encoding like br, put the encoding into
+this list.
+
+By default, HTTPie supports to decode gzip and deflate."
+  :type '(repeat (string) :tag "Content Encoding List")
+  :group 'mb-url)
+
+(defun mb-url-http-httpie-delete-content-encoding-from-list (encodings)
+  "Delete \"Content-Encoding\" if all ENCODINGS are supported by HTTPie.
+
+ENCODINGS is a comma-separated string which contains all values of
+\"Content-Encoding\".
+
+Supported encodings are in `mb-url-http-httpie-supported-content-encoding-list'."
+  (cond ((null encodings)
+         t)
+        ((seq-every-p
+          (lambda (encoding)
+            (member encoding mb-url-http-httpie-supported-content-encoding-list))
+          (mapcar 'string-trim (split-string encodings ",")))
+         nil)
+        (t t)))
+
+(defcustom mb-url-http-httpie-content-encoding-fix-function
+  'mb-url-http-httpie-delete-content-encoding-from-list
+  "A function to fix the value of \"Content-Encoding\" for HTTPie."
+  :type '(function :tag "Function")
+  :group 'mb-url)
+
+(defun mb-url-http-sentinel--httpie (proc evt)
+  "Sentinel for HTTPie.
+
+Starting from Emacs 27, `url-handle-content-transfer-encoding' deletes
+\"Content-Encoding\" after decompressing the response body.  HTTPie also
+decodes the response body but it doesn't remove the \"Content-Encoding\"
+header.  This confuses `url-handle-content-transfer-encoding' and
+`url-store-in-cache'.  Delete the header if it exists.
+
+PROC is the process.
+
+EVT describes the type of event."
+  (when (string= evt "finished\n")
+    (with-current-buffer (process-buffer proc)
+      (save-excursion
+        (mb-url-http--delete-carriage-return)
+        (when (>= emacs-major-version 27)
+          (mb-url-http--fix-header "Content-Encoding"
+                                   mb-url-http-httpie-content-encoding-fix-function
+                                   nil nil nil))
+        (mb-url-http--reset-end-of-headers)
+        (goto-char (point-min))
+        (url-http-end-of-document-sentinel proc evt)))))
+
 ;;;###autoload
 (defun mb-url-http-httpie (name url buffer default-sentinel)
   "HTTPie backend for `mb-url-http'.
@@ -366,7 +459,7 @@ DEFAULT-SENTINEL is the default sentinel of mb-url."
   (mb-url-http-make-pipe-process
    url name buffer
    (mb-url-http--httpie-command-list url)
-   default-sentinel))
+   #'mb-url-http-sentinel--httpie))
 
 (provide 'mb-url-http)
 

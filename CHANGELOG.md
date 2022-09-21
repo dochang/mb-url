@@ -5,14 +5,18 @@
 ### Added ###
 
 - Test for Emacs 28.1
+- HTTPie sentinel
+- Custom variables for deleting HTTPie supported content encodings
 
 ### Changed ###
 
 - Run GitHub Actions on pull_request
+- Modularize sentinels
 
 ### Fixed ###
 
 - Replace `cl` with `cl-lib`
+- Edit process buffer in place to avoid multibyte flag resetting
 
 ## [0.9.0] - 2021-12-05 ##
 

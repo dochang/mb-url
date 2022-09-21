@@ -55,7 +55,7 @@
 (defun mb-url-test-response-header (field-name response)
   (cdr-safe (assoc-string field-name (mb-url-test-response-headers response) t)))
 
-(defun mb-url-test-parse-response (&optional buffer)
+(defun mb-url-test-parse-response (&optional buffer skip-json)
   (unless buffer
     (setq buffer (current-buffer)))
   (let ((resp (mb-url-test-make-response)))
@@ -78,8 +78,9 @@
         (re-search-forward "^\n")
         (setf (mb-url-test-response-body resp)
               (buffer-substring (point) (point-max)))
-        (when (equal "application/json"
-                     (mb-url-test-response-header "Content-Type" resp))
+        (when (and (not skip-json)
+                   (equal "application/json"
+                          (mb-url-test-response-header "Content-Type" resp)))
           (setf (mb-url-test-response-json resp)
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
@@ -165,12 +166,41 @@ Access-Control-Allow-Credentials: true
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
-              (mb-url-http--delete-carriage-return (current-buffer))
+              (mb-url-http--delete-carriage-return)
               (should (string= (buffer-string) after)))))
         '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
           ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
           ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n")
           ("HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
+
+(ert-deftest mb-url-test-033-http--fix-header ()
+  (mapc (lambda (case)
+          (let ((src (car case))
+                (fixes (cdr case)))
+            (mapc (lambda (fix)
+                    (let ((header (nth 0 fix))
+                          (fn (nth 1 fix))
+                          (expected (nth 2 fix)))
+                      (with-temp-buffer
+                        (insert src)
+                        (goto-char (point-min))
+                        (if (< emacs-major-version 27)
+                            (should-error
+                             (mb-url-http--fix-header header fn nil nil t))
+                          (mb-url-http--fix-header header fn nil nil t)
+                          (should (string= (buffer-string) expected))))))
+                  fixes)))
+        (list
+         (list "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n"
+               (list "Foo"
+                     (lambda (args) nil)
+                     "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\n\nbody...\n")
+               (list "Foo"
+                     (lambda (args) "0")
+                     "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\nFoo: 0\n\nbody...\n")
+               (list "Foo"
+                     (lambda (args) t)
+                     "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
 
 (ert-deftest mb-url-test-050-http ()
   (unwind-protect
@@ -269,6 +299,50 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-curl
                     'mb-url-http-httpie
                     #'mb-url-http-httpie)))
+    (advice-remove 'url-http 'mb-url-http-around-advice)))
+
+(defun mb-url-test--parse-response-before-url-http-parse-headers (&rest args)
+  (setq-local mb-url-test--raw-resp (mb-url-test-parse-response nil t))
+  ;; Skip json parsing.  The response body may be encoded before
+  ;; `url-http-parse-headers'.
+  (goto-char (point-min)))
+
+(ert-deftest mb-url-test-053-sentinel-zlib-unibyte ()
+  (unwind-protect
+      (progn
+        (advice-add 'url-http :around 'mb-url-http-around-advice)
+        (advice-add 'url-http-parse-headers :before 'mb-url-test--parse-response-before-url-http-parse-headers)
+        ;; Starting from Emacs 27, `url-http-parse-headers' deletes some HTTP
+        ;; headers.  We have to parse the response before
+        ;; `url-http-parse-headers'.
+        ;;
+        ;; [1]: https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e310843d9dc106187d0e45ef7f0b9cd90a881eec
+        ;; [2]: https://github.com/emacs-mirror/emacs/commit/e310843d9dc106187d0e45ef7f0b9cd90a881eec
+        ;; [3]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=36773
+        (mapc (lambda (args)
+                (let* ((mb-url-http-backend (if (consp args) (car args) args))
+                       (encoding-raw-value (if (consp args) (cadr args) nil))
+                       (url (format "%s/gzip" mb-url-test--httpbin-prefix))
+                       (url-request-method "GET")
+                       (buffer (url-retrieve-synchronously url t t)))
+                  (with-current-buffer buffer
+                    (let* ((raw-resp (if (local-variable-p 'mb-url-test--raw-resp)
+                                         (buffer-local-value 'mb-url-test--raw-resp buffer)
+                                       (error "TIMEOUT")))
+                           (resp (mb-url-test-parse-response))
+                           (json (mb-url-test-response-json resp)))
+                      (should (= (mb-url-test-response-status-code raw-resp) 200))
+                      (if (or (< emacs-major-version 27)
+                              encoding-raw-value)
+                          (should (equal (mb-url-test-response-header "Content-Encoding" raw-resp) "gzip"))
+                        (should (null (mb-url-test-response-header "Content-Encoding" raw-resp))))
+                      (should (assoc-default 'gzipped json))))))
+              (list
+               (list 'mb-url-http-curl t)
+               (list #'mb-url-http-curl t)
+               'mb-url-http-httpie
+               #'mb-url-http-httpie)))
+    (advice-remove 'url-http-parse-headers 'mb-url-test--parse-response-before-url-http-parse-headers)
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
 (provide 'mb-url-test)
