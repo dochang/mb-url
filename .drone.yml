@@ -7,7 +7,7 @@
          "environment": {
             "DEFAULT_WORKSPACE": "/drone/src"
          },
-         "image": "megalinter/megalinter:v5",
+         "image": "oxsecurity/megalinter:v6",
          "name": "Lint"
       }
    ],
