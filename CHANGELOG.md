@@ -2,6 +2,8 @@
 
 ## [Unreleased] ##
 
+## [0.11.0] - 2022-12-01 ##
+
 ### Added ###
 
 - Test for Emacs 28.2
@@ -239,7 +241,8 @@
 <!-- Skip checking the links status because the CHANGELOG is always updated
 before the tag is created -->
 
-[Unreleased]: https://github.com/dochang/mb-url/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/dochang/mb-url/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/dochang/mb-url/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/dochang/mb-url/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/dochang/mb-url/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/dochang/mb-url/compare/0.7.0...0.8.0
