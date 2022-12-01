@@ -26,7 +26,7 @@ jobs:
       # Upload Mega-Linter artifacts
       - name: Archive production artifacts
         if: ${{ success() }} || ${{ failure() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Mega-Linter reports
           path: |
@@ -40,14 +40,14 @@ jobs:
 
       - name: Cache Guix pack
         id: guix_pack_cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.GUIX_PACK_CACHE }}
           key: guix-pack-cache-${{ hashFiles('manifest.scm') }}
 
       - name: Guix cache
         if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cache/guix
@@ -94,7 +94,7 @@ jobs:
 
       - name: Cache Guix pack
         id: guix_pack_cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.GUIX_PACK_CACHE }}
           key: guix-pack-cache-${{ hashFiles('manifest.scm') }}
