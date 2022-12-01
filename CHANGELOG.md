@@ -11,6 +11,14 @@
 - Upgrade to MegaLinter v6
 - Upgrade Github actions
 
+### Fixed ###
+
+- Lint errors
+
+### Removed ###
+
+- Drone CI configuration
+
 ## [0.10.0] - 2022-09-21 ##
 
 ### Added ###
