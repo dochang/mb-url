@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+- Test for Emacs 28.2
+
 ### Changed ###
 
 - Upgrade to MegaLinter v6
