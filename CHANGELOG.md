@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Removed ###
+
+- Unused badges
+
 ## [0.11.0] - 2022-12-01 ##
 
 ### Added ###
