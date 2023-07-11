@@ -2,7 +2,11 @@ name: CI
 on:
   - push
   - pull_request
-permissions: read-all
+permissions:
+  issues: write
+  pull-requests: write
+  # For GitHub Comment Reporter
+  # https://megalinter.io/latest/reporters/GitHubCommentReporter/
 jobs:
   Mega-Linter:
     runs-on: ubuntu-latest
