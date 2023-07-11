@@ -3,9 +3,6 @@ on:
   - push
   - pull_request
 permissions: read-all
-env:
-  GUIX_PACK_CACHE: /opt/guix-pack.tar.gz
-  GUIX_PACK_ROOT: /opt/guix
 jobs:
   Mega-Linter:
     runs-on: ubuntu-latest
@@ -34,42 +31,7 @@ jobs:
             megalinter-reports
             mega-linter.log
 
-  guix-pack:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Cache Guix pack
-        id: guix_pack_cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.GUIX_PACK_CACHE }}
-          key: guix-pack-cache-${{ hashFiles('manifest.scm') }}
-
-      - name: Guix cache
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/guix
-          key: guix-cache-${{ hashFiles('**/manifest.scm') }}
-          restore-keys: |
-            guix-cache-
-
-      - name: Install Guix
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        uses: PromyLOPh/guix-install-action@v1
-
-      - name: Guix Pack
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        run: |
-          guix pack --format=tarball --relocatable --relocatable --symlink=/bin=bin --root=/tmp/guix-pack.tar.gz --manifest=manifest.scm
-          cp /tmp/guix-pack.tar.gz "${{ env.GUIX_PACK_CACHE }}"
-          # /tmp/guix-pack.tar.gz is a symlink which points to Guix store.  Copy it.
-
   test:
-    needs:
-      - guix-pack
     runs-on: ubuntu-latest
     services:
       httpbin:
@@ -93,17 +55,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Cache Guix pack
-        id: guix_pack_cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.GUIX_PACK_CACHE }}
-          key: guix-pack-cache-${{ hashFiles('manifest.scm') }}
-
-      - name: Unpack Guix Pack
+      - name: Install homebrew
         run: |
-          mkdir -p "${{ env.GUIX_PACK_ROOT }}"
-          tar x -z -f "${{ env.GUIX_PACK_CACHE }}" -C "${{ env.GUIX_PACK_ROOT }}" -v
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        env:
+          NONINTERACTIVE: 1
 
       - name: Set up Emacs
         uses: purcell/setup-emacs@master
@@ -111,15 +67,20 @@ jobs:
           version: ${{ matrix.emacs-version }}
 
       - name: Install Eldev
-        run: curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew install curl
+          curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
 
       - name: Test
         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew bundle install
           sleep 15s
           # Waiting for httpbin
-          PATH="${GUIX_PACK_ROOT}/bin:$PATH"
           eldev lint
           eldev test
         env:
           MB_URL_TEST__HTTPBIN_PREFIX: "http://localhost:${{ job.services.httpbin.ports['80'] }}"
+          HOMEBREW_BUNDLE_NO_LOCK: 1
         timeout-minutes: 5

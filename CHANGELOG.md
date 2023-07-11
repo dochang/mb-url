@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Changed ###
+
+- Switch CI dependency management to Homebrew
+
 ### Removed ###
 
 - Unused badges
