@@ -3,9 +3,6 @@ on:
   - push
   - pull_request
 permissions: read-all
-env:
-  GUIX_PACK_CACHE: /opt/guix-pack.tar.gz
-  GUIX_PACK_ROOT: /opt/guix
 jobs:
   Mega-Linter:
     runs-on: ubuntu-latest
@@ -33,39 +30,6 @@ jobs:
           path: |
             megalinter-reports
             mega-linter.log
-
-  guix-pack:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Cache Guix pack
-        id: guix_pack_cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.GUIX_PACK_CACHE }}
-          key: guix-pack-cache-${{ hashFiles('manifest.scm') }}
-
-      - name: Guix cache
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/guix
-          key: guix-cache-${{ hashFiles('**/manifest.scm') }}
-          restore-keys: |
-            guix-cache-
-
-      - name: Install Guix
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        uses: PromyLOPh/guix-install-action@v1
-
-      - name: Guix Pack
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        run: |
-          guix pack --format=tarball --relocatable --relocatable --symlink=/bin=bin --root=/tmp/guix-pack.tar.gz --manifest=manifest.scm
-          cp /tmp/guix-pack.tar.gz "${{ env.GUIX_PACK_CACHE }}"
-          # /tmp/guix-pack.tar.gz is a symlink which points to Guix store.  Copy it.
 
   test:
     runs-on: ubuntu-latest
