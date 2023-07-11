@@ -1,0 +1,2 @@
+brew "curl"
+brew "httpie"
