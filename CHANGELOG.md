@@ -5,6 +5,7 @@
 ### Changed ###
 
 - Switch CI dependency management to Homebrew
+- Upgrade to MegaLinter v7
 
 ### Removed ###
 
