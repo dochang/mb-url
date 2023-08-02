@@ -2,6 +2,10 @@
 
 ## [Unreleased] ##
 
+### Added ###
+
+- CircleCI configuration
+
 ### Changed ###
 
 - Switch CI dependency management to Homebrew

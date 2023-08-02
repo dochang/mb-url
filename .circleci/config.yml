@@ -1,0 +1,67 @@
+version: 2.1
+
+jobs:
+  Mega-Linter:
+    environment:
+      DEFAULT_WORKSPACE: /root/project
+    docker:
+      - image: oxsecurity/megalinter-go:v7
+        # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
+    steps:
+      - checkout
+      - run:
+          command: |
+            sh /entrypoint.sh
+      - store_artifacts:
+          path: megalinter-reports
+  test:
+    parameters:
+      emacs-version:
+        type: string
+    docker:
+      - image: silex/emacs:<< parameters.emacs-version >>-ci-eldev
+        # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
+      - image: kennethreitz/httpbin
+        # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
+    steps:
+      - checkout
+      - run:
+          name: Install homebrew
+          command: |
+            apt-get update && apt-get --yes install build-essential procps curl file git
+            # https://github.com/orgs/Homebrew/discussions/3030
+            bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          environment:
+            NONINTERACTIVE: 1
+      - run:
+          name: Test
+          command: |
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+            brew bundle install
+            sleep 15s
+            # Waiting for httpbin
+            eldev lint
+            eldev test
+          environment:
+            MB_URL_TEST__HTTPBIN_PREFIX: "http://localhost:80"
+            HOMEBREW_BUNDLE_NO_LOCK: 1
+          no_output_timeout: 5m
+
+workflows:
+  CI:
+    jobs:
+      - Mega-Linter
+      - test:
+          matrix:
+            parameters:
+              emacs-version:
+                - "25.1"
+                - "25.2"
+                - "25.3"
+                - "26.1"
+                - "26.2"
+                - "26.3"
+                - "27.1"
+                - "27.2"
+                - "28.1"
+                - "28.2"
