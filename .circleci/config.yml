@@ -33,6 +33,11 @@ jobs:
             bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           environment:
             NONINTERACTIVE: 1
+      - restore_cache:
+          keys:
+            - &eldev-cache-key v1-eldev-<< parameters.emacs-version >>-{{ checksum "Eldev" }}
+            - v1-eldev-<< parameters.emacs-version >>-
+            - v1-eldev-
       - run:
           name: Test
           command: |
@@ -46,6 +51,10 @@ jobs:
             MB_URL_TEST__HTTPBIN_PREFIX: "http://localhost:80"
             HOMEBREW_BUNDLE_NO_LOCK: 1
           no_output_timeout: 5m
+      - save_cache:
+          key: *eldev-cache-key
+          paths:
+            - "~/.cache/eldev"
 
 workflows:
   CI:

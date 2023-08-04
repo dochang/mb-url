@@ -6,6 +6,7 @@
 
 - CircleCI configuration
 - CircleCI badge
+- Deps cache
 
 ### Changed ###
 

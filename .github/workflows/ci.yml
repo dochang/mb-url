@@ -73,6 +73,15 @@ jobs:
           brew install curl
           curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
 
+      - name: Cache eldev
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/eldev
+          key: v1-eldev-${{ matrix.emacs-version }}-${{ hashFiles('Eldev') }}
+          restore-keys: |
+            v1-eldev-${{ matrix.emacs-version }}-
+            v1-eldev-
+
       - name: Test
         run: |
           brew bundle install
