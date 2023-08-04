@@ -59,11 +59,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install homebrew
-        run: |
-          bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        env:
-          NONINTERACTIVE: 1
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
       - name: Set up Emacs
         uses: purcell/setup-emacs@master
@@ -72,13 +70,11 @@ jobs:
 
       - name: Install Eldev
         run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           brew install curl
           curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
 
       - name: Test
         run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           brew bundle install
           sleep 15s
           # Waiting for httpbin
