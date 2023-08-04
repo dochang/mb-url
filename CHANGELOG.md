@@ -5,6 +5,7 @@
 ### Added ###
 
 - CircleCI configuration
+- CircleCI badge
 
 ### Changed ###
 
