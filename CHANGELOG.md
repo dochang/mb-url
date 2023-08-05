@@ -7,6 +7,7 @@
 - CircleCI configuration
 - CircleCI badge
 - Deps cache
+- Test for Emacs 29.1
 
 ### Changed ###
 
