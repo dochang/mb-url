@@ -86,7 +86,7 @@ jobs:
       - name: Test
         run: |
           brew bundle install
-          sleep 15s
+          dockerize -wait "${MB_URL_TEST__MOCKAPI_PREFIX}" -timeout 60s
           # Waiting for mock server
           eldev lint
           eldev test
