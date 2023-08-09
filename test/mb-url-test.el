@@ -41,8 +41,8 @@
 ;; Do not truncate the backtrace.  This makes ERT easy to debug.
 (setq ert-batch-backtrace-right-margin 256)
 
-(setq mb-url-test--httpbin-prefix
-      (let ((prefix (getenv "MB_URL_TEST__HTTPBIN_PREFIX")))
+(setq mb-url-test--mockapi-prefix
+      (let ((prefix (getenv "MB_URL_TEST__MOCKAPI_PREFIX")))
         (if (mb-url-string-empty-p prefix)
             "https://httpbin.org"
           prefix)))
@@ -263,7 +263,7 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend))
                   ;; GET
-                  (let* ((url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix))
+                  (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix))
                          (buffer (url-retrieve-synchronously url t t)))
                     (with-current-buffer buffer
                       (goto-char (point-min))
@@ -277,7 +277,7 @@ Access-Control-Allow-Credentials: true
                                  (assoc-default 'foo (assoc-default 'args json))
                                  "bar")))))
                   ;; POST with request data
-                  (let* ((url (format "%s/post" mb-url-test--httpbin-prefix))
+                  (let* ((url (format "%s/post" mb-url-test--mockapi-prefix))
                          (url-request-method "POST")
                          (url-request-extra-headers '(("Content-Type" . "text/plain")))
                          (url-request-data "foobar")
@@ -300,7 +300,7 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie))
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend)
-                      (url (format "%s/get?foo=bar" mb-url-test--httpbin-prefix)))
+                      (url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
                   (should-error (url-retrieve-synchronously url t t))))
               (list 'mb-url-test--foobar
                     #'mb-url-test--foobar)))
@@ -312,7 +312,7 @@ Access-Control-Allow-Credentials: true
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (url (format "%s/image/png" mb-url-test--httpbin-prefix))
+                       (url (format "%s/image/png" mb-url-test--mockapi-prefix))
                        (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer
                     (goto-char (point-min))
@@ -336,7 +336,7 @@ Access-Control-Allow-Credentials: true
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (url (format "%s/post" mb-url-test--httpbin-prefix))
+                       (url (format "%s/post" mb-url-test--mockapi-prefix))
                        (url-request-method "POST")
                        (url-request-extra-headers '(("Content-Type" . "text/plain")))
                        (url-request-data "你好，世界")
@@ -376,7 +376,7 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (args)
                 (let* ((mb-url-http-backend (if (consp args) (car args) args))
                        (encoding-raw-value (if (consp args) (cadr args) nil))
-                       (url (format "%s/gzip" mb-url-test--httpbin-prefix))
+                       (url (format "%s/gzip" mb-url-test--mockapi-prefix))
                        (url-request-method "GET")
                        (buffer (url-retrieve-synchronously url t t)))
                   (with-current-buffer buffer

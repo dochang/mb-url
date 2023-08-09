@@ -7,8 +7,9 @@ FILEIO_REPORTER: true
 DISABLE_LINTERS:
   - REPOSITORY_DEVSKIM
 REPOSITORY_DEVSKIM_ARGUMENTS: --ignore-globs .github/workflows/ci.yml
-# We use internal container to serve httpbin and we are unable to exclude all
-# CI files which contain `http://localhost` because of the following error:
+# We use internal container to serve http mock server and we are unable to
+# exclude all CI files which contain `http://localhost` because of the
+# following error:
 #
 # Specify --help for a list of available options and commands.
 # Unhandled exception. Microsoft.Extensions.CommandLineUtils.CommandParsingException: Unexpected value '**/megalinter-reports/**' for option 'ignore-globs'
