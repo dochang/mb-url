@@ -80,7 +80,8 @@
               (buffer-substring (point) (point-max)))
         (when (and (not skip-json)
                    (equal "application/json"
-                          (mb-url-test-response-header "Content-Type" resp)))
+                          (car (mail-header-parse-content-type
+                                (mb-url-test-response-header "Content-Type" resp)))))
           (setf (mb-url-test-response-json resp)
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
@@ -275,7 +276,8 @@ Access-Control-Allow-Credentials: true
                              (json (mb-url-test-response-json resp)))
                         (should (= (mb-url-test-response-status-code resp) 200))
                         (should (equal
-                                 (mb-url-test-response-header "Content-Type" resp)
+                                 (car (mail-header-parse-content-type
+                                       (mb-url-test-response-header "Content-Type" resp)))
                                  "application/json"))
                         (should (equal
                                  (assoc-default 'foo (assoc-default 'args json))
@@ -293,7 +295,8 @@ Access-Control-Allow-Credentials: true
                              (json (mb-url-test-response-json resp)))
                         (should (= (mb-url-test-response-status-code resp) 200))
                         (should (equal
-                                 (mb-url-test-response-header "Content-Type" resp)
+                                 (car (mail-header-parse-content-type
+                                       (mb-url-test-response-header "Content-Type" resp)))
                                  "application/json"))
                         (should (equal
                                  (assoc-default 'Content-Type (assoc-default 'headers json))
@@ -353,7 +356,10 @@ Access-Control-Allow-Credentials: true
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
                       (should (= (mb-url-test-response-status-code resp) 200))
-                      (should (equal (mb-url-test-response-header "Content-Type" resp) "application/json"))
+                      (should (equal
+                               (car (mail-header-parse-content-type
+                                     (mb-url-test-response-header "Content-Type" resp)))
+                               "application/json"))
                       (should (equal (assoc-default 'Content-Type (assoc-default 'headers json)) "text/plain"))
                       (should (equal (assoc-default 'data json) url-request-data))))))
               (list 'mb-url-http-curl
