@@ -85,6 +85,9 @@
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
 
+(defun mb-url-test--buffer-live-p (buffer)
+  (and buffer (buffer-live-p buffer)))
+
 (ert-deftest mb-url-test-010-parse-response ()
   (let* ((headers "HTTP/1.1 200 OK
 Server: nginx
@@ -265,6 +268,7 @@ Access-Control-Allow-Credentials: true
                   ;; GET
                   (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix))
                          (buffer (url-retrieve-synchronously url t t)))
+                    (should (mb-url-test--buffer-live-p buffer))
                     (with-current-buffer buffer
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
@@ -282,6 +286,7 @@ Access-Control-Allow-Credentials: true
                          (url-request-extra-headers '(("Content-Type" . "text/plain")))
                          (url-request-data "foobar")
                          (buffer (url-retrieve-synchronously url t t)))
+                    (should (mb-url-test--buffer-live-p buffer))
                     (with-current-buffer buffer
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
@@ -314,6 +319,7 @@ Access-Control-Allow-Credentials: true
                 (let* ((mb-url-http-backend backend)
                        (url (format "%s/image/png" mb-url-test--mockapi-prefix))
                        (buffer (url-retrieve-synchronously url t t)))
+                  (should (mb-url-test--buffer-live-p buffer))
                   (with-current-buffer buffer
                     (goto-char (point-min))
                     (let ((end-of-headers
@@ -341,6 +347,7 @@ Access-Control-Allow-Credentials: true
                        (url-request-extra-headers '(("Content-Type" . "text/plain")))
                        (url-request-data "你好，世界")
                        (buffer (url-retrieve-synchronously url t t)))
+                  (should (mb-url-test--buffer-live-p buffer))
                   (with-current-buffer buffer
                     (goto-char (point-min))
                     (let* ((resp (mb-url-test-parse-response))
@@ -379,6 +386,7 @@ Access-Control-Allow-Credentials: true
                        (url (format "%s/gzip" mb-url-test--mockapi-prefix))
                        (url-request-method "GET")
                        (buffer (url-retrieve-synchronously url t t)))
+                  (should (mb-url-test--buffer-live-p buffer))
                   (with-current-buffer buffer
                     (let* ((raw-resp (if (local-variable-p 'mb-url-test--raw-resp)
                                          (buffer-local-value 'mb-url-test--raw-resp buffer)
