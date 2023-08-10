@@ -280,7 +280,7 @@ Access-Control-Allow-Credentials: true
                                        (mb-url-test-response-header "Content-Type" resp)))
                                  "application/json"))
                         (should (equal
-                                 (assoc-default 'foo (assoc-default 'args json))
+                                 (aref (assoc-default 'foo (assoc-default 'args json)) 0)
                                  "bar")))))
                   ;; POST with request data
                   (let* ((url (format "%s/post" mb-url-test--mockapi-prefix))
@@ -300,7 +300,7 @@ Access-Control-Allow-Credentials: true
                                  "application/json"))
                         (should (equal
                                  (car (mail-header-parse-content-type
-                                       (assoc-default 'Content-Type (assoc-default 'headers json))))
+                                       (aref (assoc-default 'Content-Type (assoc-default 'headers json)) 0)))
                                  "text/plain"))
                         (should (equal (assoc-default 'data json) url-request-data)))))))
               (list 'mb-url-http-curl
@@ -363,7 +363,7 @@ Access-Control-Allow-Credentials: true
                                "application/json"))
                       (should (equal
                                (car (mail-header-parse-content-type
-                                     (assoc-default 'Content-Type (assoc-default 'headers json))))
+                                     (aref (assoc-default 'Content-Type (assoc-default 'headers json)) 0)))
                                "text/plain"))
                       (should (equal
                                (decode-coding-string (assoc-default 'data json) 'utf-8)
