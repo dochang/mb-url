@@ -18,6 +18,10 @@
 
 - Unused badges
 
+### Fixed ###
+
+- I18N test
+
 ## [0.11.0] - 2022-12-01 ##
 
 ### Added ###

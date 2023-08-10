@@ -299,7 +299,8 @@ Access-Control-Allow-Credentials: true
                                        (mb-url-test-response-header "Content-Type" resp)))
                                  "application/json"))
                         (should (equal
-                                 (assoc-default 'Content-Type (assoc-default 'headers json))
+                                 (car (mail-header-parse-content-type
+                                       (assoc-default 'Content-Type (assoc-default 'headers json))))
                                  "text/plain"))
                         (should (equal (assoc-default 'data json) url-request-data)))))))
               (list 'mb-url-http-curl
@@ -347,7 +348,7 @@ Access-Control-Allow-Credentials: true
                 (let* ((mb-url-http-backend backend)
                        (url (format "%s/post" mb-url-test--mockapi-prefix))
                        (url-request-method "POST")
-                       (url-request-extra-headers '(("Content-Type" . "text/plain")))
+                       (url-request-extra-headers '(("Content-Type" . "text/plain; charset=utf-8")))
                        (url-request-data "你好，世界")
                        (buffer (url-retrieve-synchronously url t t)))
                   (should (mb-url-test--buffer-live-p buffer))
@@ -360,8 +361,13 @@ Access-Control-Allow-Credentials: true
                                (car (mail-header-parse-content-type
                                      (mb-url-test-response-header "Content-Type" resp)))
                                "application/json"))
-                      (should (equal (assoc-default 'Content-Type (assoc-default 'headers json)) "text/plain"))
-                      (should (equal (assoc-default 'data json) url-request-data))))))
+                      (should (equal
+                               (car (mail-header-parse-content-type
+                                     (assoc-default 'Content-Type (assoc-default 'headers json))))
+                               "text/plain"))
+                      (should (equal
+                               (decode-coding-string (assoc-default 'data json) 'utf-8)
+                               url-request-data))))))
               (list 'mb-url-http-curl
                     #'mb-url-http-curl
                     'mb-url-http-httpie
