@@ -21,7 +21,7 @@ jobs:
     docker:
       - image: silex/emacs:<< parameters.emacs-version >>-ci-eldev
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
-      - image: kennethreitz/httpbin
+      - image: mccutchen/go-httpbin
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
     steps:
       - checkout
@@ -48,7 +48,7 @@ jobs:
             eldev lint
             eldev test
           environment:
-            MB_URL_TEST__MOCKAPI_PREFIX: "http://localhost:80"
+            MB_URL_TEST__MOCKAPI_PREFIX: "http://localhost:8080"
             HOMEBREW_BUNDLE_NO_LOCK: 1
           no_output_timeout: 5m
       - save_cache:
