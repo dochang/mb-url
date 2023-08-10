@@ -13,6 +13,7 @@
 
 - Switch CI dependency management to Homebrew
 - Upgrade to MegaLinter v7
+- Replace httpbin with httpbingo
 
 ### Removed ###
 

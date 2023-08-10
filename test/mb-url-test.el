@@ -44,7 +44,7 @@
 (setq mb-url-test--mockapi-prefix
       (let ((prefix (getenv "MB_URL_TEST__MOCKAPI_PREFIX")))
         (if (mb-url-string-empty-p prefix)
-            "https://httpbin.org"
+            "https://httpbingo.org"
           prefix)))
 
 (cl-defstruct (mb-url-test-response
