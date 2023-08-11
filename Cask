@@ -1,7 +1,7 @@
 (source gnu)
 (source melpa)
 
-(package "mb-url" "0.11.0" "Multiple backends for URL package.")
+(package "mb-url" "0.12.0" "Multiple backends for URL package.")
 
 (depends-on "cl-lib")
 
