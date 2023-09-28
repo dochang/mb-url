@@ -11,7 +11,7 @@ jobs:
   Mega-Linter:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Mega-Linter
       - name: Mega-Linter
@@ -58,7 +58,7 @@ jobs:
           - "28.2"
           - "29.1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Homebrew
         id: set-up-homebrew
