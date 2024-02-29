@@ -75,7 +75,7 @@ jobs:
           curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
 
       - name: Cache eldev
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/eldev
           key: v1-eldev-${{ matrix.emacs-version }}-${{ hashFiles('Eldev') }}
