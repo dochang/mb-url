@@ -6,6 +6,10 @@
 
 - Test for Emacs 29.2..29.4
 
+### Changed
+
+- Require all HTTP clients to automatically decompress response bodies
+
 ## [0.12.0] - 2023-08-11
 
 ### Added

@@ -206,6 +206,24 @@ Access-Control-Allow-Credentials: true
                      (lambda (args) t)
                      "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
 
+(ert-deftest mb-url-test-035-http--delete-content-encoding ()
+  (mapc (lambda (case)
+          (let ((before (car case))
+                (after (cadr case)))
+            (with-temp-buffer
+              (insert before)
+              (goto-char (point-min))
+              (mb-url-http--delete-content-encoding)
+              (should (string= (buffer-string) after)))))
+        '(("HTTP/1.1 200 OK\nContent-Encoding: gzip\nFoo: 1\n\nbody...\n"
+           "HTTP/1.1 200 OK\nFoo: 1\n\nbody...\n")
+          ("HTTP/1.1 200 OK\nFoo: 1\nContent-Encoding: gzip\n\nbody...\n"
+           "HTTP/1.1 200 OK\nFoo: 1\n\nbody...\n")
+          ("HTTP/1.1 200 OK\nFoo: 1\nContent-Encoding: gzip\nBar: 2\n\nbody...\n"
+           "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n")
+          ("HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"
+           "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"))))
+
 (ert-deftest mb-url-test-034-http--url-http-variables ()
   (mapc (lambda (case)
           (cl-destructuring-bind
@@ -374,49 +392,27 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
-(defun mb-url-test--parse-response-before-url-http-parse-headers (&rest args)
-  (setq-local mb-url-test--raw-resp (mb-url-test-parse-response nil t))
-  ;; Skip json parsing.  The response body may be encoded before
-  ;; `url-http-parse-headers'.
-  (goto-char (point-min)))
-
 (ert-deftest mb-url-test-053-sentinel-zlib-unibyte ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
-        (advice-add 'url-http-parse-headers :before 'mb-url-test--parse-response-before-url-http-parse-headers)
-        ;; Starting from Emacs 27, `url-http-parse-headers' deletes some HTTP
-        ;; headers.  We have to parse the response before
-        ;; `url-http-parse-headers'.
-        ;;
-        ;; [1]: https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e310843d9dc106187d0e45ef7f0b9cd90a881eec
-        ;; [2]: https://github.com/emacs-mirror/emacs/commit/e310843d9dc106187d0e45ef7f0b9cd90a881eec
-        ;; [3]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=36773
-        (mapc (lambda (args)
-                (let* ((mb-url-http-backend (if (consp args) (car args) args))
-                       (encoding-raw-value (if (consp args) (cadr args) nil))
+        (mapc (lambda (backend)
+                (let* ((mb-url-http-backend backend)
                        (url (format "%s/gzip" mb-url-test--mockapi-prefix))
                        (url-request-method "GET")
                        (buffer (url-retrieve-synchronously url t t)))
                   (should (mb-url-test--buffer-live-p buffer))
                   (with-current-buffer buffer
-                    (let* ((raw-resp (if (local-variable-p 'mb-url-test--raw-resp)
-                                         (buffer-local-value 'mb-url-test--raw-resp buffer)
-                                       (error "TIMEOUT")))
-                           (resp (mb-url-test-parse-response))
+                    (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
-                      (should (= (mb-url-test-response-status-code raw-resp) 200))
-                      (if (or (< emacs-major-version 27)
-                              encoding-raw-value)
-                          (should (equal (mb-url-test-response-header "Content-Encoding" raw-resp) "gzip"))
-                        (should (null (mb-url-test-response-header "Content-Encoding" raw-resp))))
+                      (should (= (mb-url-test-response-status-code resp) 200))
+                      (should (null (mb-url-test-response-header "Content-Encoding" resp)))
                       (should (assoc-default 'gzipped json))))))
               (list
-               (list 'mb-url-http-curl t)
-               (list #'mb-url-http-curl t)
+               'mb-url-http-curl
+               #'mb-url-http-curl
                'mb-url-http-httpie
                #'mb-url-http-httpie)))
-    (advice-remove 'url-http-parse-headers 'mb-url-test--parse-response-before-url-http-parse-headers)
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
 (provide 'mb-url-test)

@@ -151,6 +151,31 @@ This function is only implemented in Emacs 27+."
                (goto-char (point-max))
                (insert (concat header ": " fixed "\n"))))))))
 
+(defun mb-url-http--delete-content-encoding ()
+  "Delete \"Content-Encoding\" from headers.
+
+Starting from Emacs 27, if `Content-Encoding' is `gzip' and Emacs
+has zlib support, `url-handle-content-transfer-encoding', which
+is called by `url-http-parse-headers', will decompress response
+bodies and will delete `Content-Encoding' from headers.
+
+External HTTP clients automatically decompress response bodies
+but keep `Content-Encoding' undeleted.  This confuses
+`url-handle-content-transfer-encoding' and `url-store-in-cache'.
+Delete `Content-Encoding' manually."
+  ;; [1]: https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e310843d9dc106187d0e45ef7f0b9cd90a881eec
+  ;; [2]: https://github.com/emacs-mirror/emacs/commit/e310843d9dc106187d0e45ef7f0b9cd90a881eec
+  ;; [3]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=36773
+  (save-excursion
+    (goto-char (point-min))
+    (let ((end-of-headers (re-search-forward "\n\n" nil t))
+          (case-fold-search t))
+      (save-restriction
+        (narrow-to-region (point-min) end-of-headers)
+        (goto-char (point-min))
+        (while (re-search-forward "Content-Encoding: .*\n" nil t)
+          (replace-match ""))))))
+
 (defun mb-url-http--reset-end-of-headers ()
   "Reset url-http-end-of-headers."
   (setq url-http-end-of-headers
@@ -167,6 +192,7 @@ EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
       (mb-url-http--delete-carriage-return)
+      (mb-url-http--delete-content-encoding)
       (mb-url-http--reset-end-of-headers)
       (goto-char (point-min))
       (url-http-end-of-document-sentinel proc evt))))
@@ -393,7 +419,7 @@ If SENTINEL is nil, `mb-url-http-sentinel' will be used."
 (defun mb-url-http--curl-command-list (url)
   "Return curl command list for URL."
   `(,mb-url-http-curl-program
-    "--silent" "--show-error" "--include"
+    "--silent" "--show-error" "--include" "--compressed"
     ,@(if (string= "HEAD" url-request-method)
           (list "--head")
         (list "--request" url-request-method))
@@ -420,6 +446,7 @@ EVT describes the type of event."
       (save-excursion
         (mb-url-http--delete-proxy-response)
         (mb-url-http--delete-carriage-return)
+        (mb-url-http--delete-content-encoding)
         (mb-url-http--reset-end-of-headers)
         (goto-char (point-min))
         (url-http-end-of-document-sentinel proc evt)))))
@@ -471,62 +498,6 @@ Remove internal headers for HTTPie from the headers."
               (mb-url-http--httpie-extra-headers url))
     ,@mb-url-http-httpie-switches))
 
-(defcustom mb-url-http-httpie-supported-content-encoding-list '("gzip" "deflate")
-  "Content encodings which HTTPie supports to decode.
-
-If your HTTPie supports to decode a encoding like br, put the encoding into
-this list.
-
-By default, HTTPie supports to decode gzip and deflate."
-  :type '(repeat (string) :tag "Content Encoding List")
-  :group 'mb-url)
-
-(defun mb-url-http-httpie-delete-content-encoding-from-list (encodings)
-  "Delete \"Content-Encoding\" if all ENCODINGS are supported by HTTPie.
-
-ENCODINGS is a comma-separated string which contains all values of
-\"Content-Encoding\".
-
-Supported encodings are in `mb-url-http-httpie-supported-content-encoding-list'."
-  (cond ((null encodings)
-         t)
-        ((seq-every-p
-          (lambda (encoding)
-            (member encoding mb-url-http-httpie-supported-content-encoding-list))
-          (mapcar 'string-trim (split-string encodings ",")))
-         nil)
-        (t t)))
-
-(defcustom mb-url-http-httpie-content-encoding-fix-function
-  'mb-url-http-httpie-delete-content-encoding-from-list
-  "A function to fix the value of \"Content-Encoding\" for HTTPie."
-  :type '(function :tag "Function")
-  :group 'mb-url)
-
-(defun mb-url-http-sentinel--httpie (proc evt)
-  "Sentinel for HTTPie.
-
-Starting from Emacs 27, `url-handle-content-transfer-encoding' deletes
-\"Content-Encoding\" after decompressing the response body.  HTTPie also
-decodes the response body but it doesn't remove the \"Content-Encoding\"
-header.  This confuses `url-handle-content-transfer-encoding' and
-`url-store-in-cache'.  Delete the header if it exists.
-
-PROC is the process.
-
-EVT describes the type of event."
-  (when (string= evt "finished\n")
-    (with-current-buffer (process-buffer proc)
-      (save-excursion
-        (mb-url-http--delete-carriage-return)
-        (when (>= emacs-major-version 27)
-          (mb-url-http--fix-header "Content-Encoding"
-                                   mb-url-http-httpie-content-encoding-fix-function
-                                   nil nil nil))
-        (mb-url-http--reset-end-of-headers)
-        (goto-char (point-min))
-        (url-http-end-of-document-sentinel proc evt)))))
-
 ;;;###autoload
 (defun mb-url-http-httpie (name url buffer default-sentinel)
   "HTTPie backend for `mb-url-http'.
@@ -541,7 +512,7 @@ DEFAULT-SENTINEL is the default sentinel of mb-url."
   (mb-url-http-make-pipe-process
    url name buffer
    (mb-url-http--httpie-command-list url)
-   #'mb-url-http-sentinel--httpie))
+   default-sentinel))
 
 (provide 'mb-url-http)
 
