@@ -11,6 +11,10 @@
 - Require all HTTP clients to automatically decompress response bodies
 - Simplify Curl sentinel
 
+### Removed
+
+- Support for Emacs 25 and 26
+
 ## [0.12.0] - 2023-08-11
 
 ### Added

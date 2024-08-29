@@ -188,11 +188,8 @@ Access-Control-Allow-Credentials: true
                       (with-temp-buffer
                         (insert src)
                         (goto-char (point-min))
-                        (if (< emacs-major-version 27)
-                            (should-error
-                             (mb-url-http--fix-header header fn nil nil t))
-                          (mb-url-http--fix-header header fn nil nil t)
-                          (should (string= (buffer-string) expected))))))
+                        (mb-url-http--fix-header header fn nil nil t)
+                        (should (string= (buffer-string) expected)))))
                   fixes)))
         (list
          (list "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n"

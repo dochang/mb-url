@@ -126,11 +126,7 @@ string, the value of HEADER will be replaced with the string.  If it returns
 nil, all HEADER lines will be removed.  If it returns t, all HEADER lines
 keeps unchanged.
 
-LAST, ALL, LIST will be passed to `mail-fetch-field'.
-
-This function is only implemented in Emacs 27+."
-  (when (< emacs-major-version 27)
-    (error "Not implemented in Emacs %s" emacs-version))
+LAST, ALL, LIST will be passed to `mail-fetch-field'."
   (save-excursion
     (save-restriction
       (goto-char (point-min))
