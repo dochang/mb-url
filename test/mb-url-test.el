@@ -86,9 +86,6 @@
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
 
-(defun mb-url-test--buffer-live-p (buffer)
-  (and buffer (buffer-live-p buffer)))
-
 (ert-deftest mb-url-test-100-parse-response ()
   (let* ((headers "HTTP/1.1 200 OK
 Server: nginx
@@ -284,10 +281,8 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend))
                   ;; GET
-                  (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix))
-                         (buffer (url-retrieve-synchronously url t t)))
-                    (should (mb-url-test--buffer-live-p buffer))
-                    (with-current-buffer buffer
+                  (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
+                    (with-current-buffer (url-retrieve-synchronously url t t)
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
                              (json (mb-url-test-response-json resp)))
@@ -303,10 +298,8 @@ Access-Control-Allow-Credentials: true
                   (let* ((url (format "%s/post" mb-url-test--mockapi-prefix))
                          (url-request-method "POST")
                          (url-request-extra-headers '(("Content-Type" . "text/plain")))
-                         (url-request-data "foobar")
-                         (buffer (url-retrieve-synchronously url t t)))
-                    (should (mb-url-test--buffer-live-p buffer))
-                    (with-current-buffer buffer
+                         (url-request-data "foobar"))
+                    (with-current-buffer (url-retrieve-synchronously url t t)
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
                              (json (mb-url-test-response-json resp)))
@@ -338,10 +331,8 @@ Access-Control-Allow-Credentials: true
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (url (format "%s/image/png" mb-url-test--mockapi-prefix))
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (should (mb-url-test--buffer-live-p buffer))
-                  (with-current-buffer buffer
+                       (url (format "%s/image/png" mb-url-test--mockapi-prefix)))
+                  (with-current-buffer (url-retrieve-synchronously url t t)
                     (goto-char (point-min))
                     (let ((end-of-headers
                            (save-excursion
@@ -366,10 +357,8 @@ Access-Control-Allow-Credentials: true
                        (url (format "%s/post" mb-url-test--mockapi-prefix))
                        (url-request-method "POST")
                        (url-request-extra-headers '(("Content-Type" . "text/plain; charset=utf-8")))
-                       (url-request-data "你好，世界")
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (should (mb-url-test--buffer-live-p buffer))
-                  (with-current-buffer buffer
+                       (url-request-data "你好，世界"))
+                  (with-current-buffer (url-retrieve-synchronously url t t)
                     (goto-char (point-min))
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
@@ -398,10 +387,8 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
                        (url (format "%s/gzip" mb-url-test--mockapi-prefix))
-                       (url-request-method "GET")
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (should (mb-url-test--buffer-live-p buffer))
-                  (with-current-buffer buffer
+                       (url-request-method "GET"))
+                  (with-current-buffer (url-retrieve-synchronously url t t)
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
                       (should (= (mb-url-test-response-status-code resp) 200))
