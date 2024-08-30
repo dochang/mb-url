@@ -89,7 +89,7 @@
 (defun mb-url-test--buffer-live-p (buffer)
   (and buffer (buffer-live-p buffer)))
 
-(ert-deftest mb-url-test-010-parse-response ()
+(ert-deftest mb-url-test-100-parse-response ()
   (let* ((headers "HTTP/1.1 200 OK
 Server: nginx
 Date: Wed, 02 Dec 2015 16:23:47 GMT
@@ -124,7 +124,7 @@ Access-Control-Allow-Credentials: true
         (should (equal (assoc-default 'url (mb-url-test-response-json resp))
                        "https://httpbin.org/get"))))))
 
-(ert-deftest mb-url-test-010-header-field-to-argument ()
+(ert-deftest mb-url-test-101-header-field-to-argument ()
   (mapc (lambda (case)
           (let ((field (car case))
                 (expected (cdr case)))
@@ -133,7 +133,7 @@ Access-Control-Allow-Credentials: true
           (("X-Foo2" . "") . "X-Foo2;")
           (("X-Foo3" . nil) . "X-Foo3"))))
 
-(ert-deftest mb-url-test-030-http--goto-next-body ()
+(ert-deftest mb-url-test-300-http--goto-next-body ()
   (mapc (lambda (case)
           (let ((text (nth 0 case))
                 (char (nth 1 case))
@@ -150,7 +150,7 @@ Access-Control-Allow-Credentials: true
           ("a\nb\n\nc" ?c nil)
           ("a\rb\r\rc" ?c search-failed))))
 
-(ert-deftest mb-url-test-031-http--delete-proxy-response ()
+(ert-deftest mb-url-test-301-http--delete-proxy-response ()
   (mapc (lambda (case)
           (let ((before (car case))
                 (after (cdr case)))
@@ -163,7 +163,7 @@ Access-Control-Allow-Credentials: true
           ("HTTP/1.1 200 Connection established\nProxy-Header: foo\n\nHTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
           ("HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
 
-(ert-deftest mb-url-test-032-http--delete-carriage-return ()
+(ert-deftest mb-url-test-302-http--delete-carriage-return ()
   (mapc (lambda (case)
           (let ((before (car case))
                 (after (cdr case)))
@@ -177,7 +177,7 @@ Access-Control-Allow-Credentials: true
           ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
           ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"))))
 
-(ert-deftest mb-url-test-033-http--fix-header ()
+(ert-deftest mb-url-test-303-http--fix-header ()
   (mapc (lambda (case)
           (let ((src (car case))
                 (fixes (cdr case)))
@@ -203,7 +203,7 @@ Access-Control-Allow-Credentials: true
                      (lambda (args) t)
                      "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
 
-(ert-deftest mb-url-test-035-http--delete-content-encoding ()
+(ert-deftest mb-url-test-304-http--delete-content-encoding ()
   (mapc (lambda (case)
           (let ((before (car case))
                 (after (cadr case)))
@@ -221,7 +221,7 @@ Access-Control-Allow-Credentials: true
           ("HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"
            "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"))))
 
-(ert-deftest mb-url-test-034-http--url-http-variables ()
+(ert-deftest mb-url-test-400-http--url-http-variables ()
   (mapc (lambda (case)
           (cl-destructuring-bind
               (mime-accept-string request-noninteractive current-lastloc url-string)
@@ -243,7 +243,7 @@ Access-Control-Allow-Credentials: true
               (kill-buffer buf))))
         '(("*/*" t "http://foo/a" "http://foo/b"))))
 
-(ert-deftest mb-url-test-034-http--extra-variables ()
+(ert-deftest mb-url-test-401-http--extra-variables ()
   (mapc (lambda (case)
           (let* ((url-request-extra-headers case)
                  (url-personal-mail-address "From*")
@@ -275,7 +275,7 @@ Access-Control-Allow-Credentials: true
            ("Accept" . "text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8")
            ("Content-Length" . "42")))))
 
-(ert-deftest mb-url-test-050-http ()
+(ert-deftest mb-url-test-500-http ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
@@ -330,7 +330,7 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-test--foobar)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
-(ert-deftest mb-url-test-051-sentinal ()
+(ert-deftest mb-url-test-501-sentinal ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
@@ -355,7 +355,7 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
-(ert-deftest mb-url-test-052-unibyte ()
+(ert-deftest mb-url-test-502-unibyte ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
@@ -389,7 +389,7 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
-(ert-deftest mb-url-test-053-sentinel-zlib-unibyte ()
+(ert-deftest mb-url-test-503-sentinel-zlib-unibyte ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
