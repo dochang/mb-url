@@ -228,6 +228,21 @@ Access-Control-Allow-Credentials: true
           ("HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"
            "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"))))
 
+(ert-deftest mb-url-test-305-http--reset-end-of-headers ()
+  (mapc (lambda (case)
+          (let ((expected (nth 0 case))
+                (msg (nth 1 case)))
+            (with-temp-buffer
+              (insert msg)
+              (goto-char (point-min))
+              (make-local-variable 'url-http-end-of-headers)
+              (mb-url-http--reset-end-of-headers)
+              (should (= expected (marker-position url-http-end-of-headers))))))
+        '((31 ;; Buffer starts from 1.
+           "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n")
+          (35 ;; Buffer starts from 1.
+           "HTTP/1.1 200 OK\r\nFoo: 1\r\nBar: 2\r\n\r\nbody...\n"))))
+
 (ert-deftest mb-url-test-400-http--url-http-variables ()
   (mapc (lambda (case)
           (cl-destructuring-bind
