@@ -443,13 +443,8 @@ PROC is the process.
 EVT describes the type of event."
   (when (string= evt "finished\n")
     (with-current-buffer (process-buffer proc)
-      (save-excursion
-        (mb-url-http--delete-proxy-response)
-        (mb-url-http--delete-carriage-return)
-        (mb-url-http--delete-content-encoding)
-        (mb-url-http--reset-end-of-headers)
-        (goto-char (point-min))
-        (url-http-end-of-document-sentinel proc evt)))))
+      (mb-url-http--delete-proxy-response)))
+  (mb-url-http-sentinel proc evt))
 
 ;;;###autoload
 (defun mb-url-http-curl (name url buffer default-sentinel)

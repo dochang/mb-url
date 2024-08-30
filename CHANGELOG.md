@@ -9,6 +9,7 @@
 ### Changed
 
 - Require all HTTP clients to automatically decompress response bodies
+- Simplify Curl sentinel
 
 ## [0.12.0] - 2023-08-11
 
