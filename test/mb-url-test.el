@@ -86,6 +86,14 @@
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
 
+;; Sometimes HTTP clients may be dead for unknown reason.  We have to wrap
+;; `url-retrieve-synchronously'.
+(defun mb-url-test--fetch (url &optional silent inhibit-cookies timeout)
+  (let (buffer)
+    (while (null buffer)
+      (setq buffer (url-retrieve-synchronously url silent inhibit-cookies timeout)))
+    buffer))
+
 (ert-deftest mb-url-test-100-parse-response ()
   (let* ((headers "HTTP/1.1 200 OK
 Server: nginx
@@ -282,7 +290,7 @@ Access-Control-Allow-Credentials: true
                 (let ((mb-url-http-backend backend))
                   ;; GET
                   (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
-                    (with-current-buffer (url-retrieve-synchronously url t t)
+                    (with-current-buffer (mb-url-test--fetch url t t)
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
                              (json (mb-url-test-response-json resp)))
@@ -299,7 +307,7 @@ Access-Control-Allow-Credentials: true
                          (url-request-method "POST")
                          (url-request-extra-headers '(("Content-Type" . "text/plain")))
                          (url-request-data "foobar"))
-                    (with-current-buffer (url-retrieve-synchronously url t t)
+                    (with-current-buffer (mb-url-test--fetch url t t)
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
                              (json (mb-url-test-response-json resp)))
@@ -320,7 +328,7 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend)
                       (url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
-                  (should-error (url-retrieve-synchronously url t t))))
+                  (should-error (mb-url-test--fetch url t t))))
               (list 'mb-url-test--foobar
                     #'mb-url-test--foobar)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
@@ -332,7 +340,7 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
                        (url (format "%s/image/png" mb-url-test--mockapi-prefix)))
-                  (with-current-buffer (url-retrieve-synchronously url t t)
+                  (with-current-buffer (mb-url-test--fetch url t t)
                     (goto-char (point-min))
                     (let ((end-of-headers
                            (save-excursion
@@ -358,7 +366,7 @@ Access-Control-Allow-Credentials: true
                        (url-request-method "POST")
                        (url-request-extra-headers '(("Content-Type" . "text/plain; charset=utf-8")))
                        (url-request-data "你好，世界"))
-                  (with-current-buffer (url-retrieve-synchronously url t t)
+                  (with-current-buffer (mb-url-test--fetch url t t)
                     (goto-char (point-min))
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
@@ -388,7 +396,7 @@ Access-Control-Allow-Credentials: true
                 (let* ((mb-url-http-backend backend)
                        (url (format "%s/gzip" mb-url-test--mockapi-prefix))
                        (url-request-method "GET"))
-                  (with-current-buffer (url-retrieve-synchronously url t t)
+                  (with-current-buffer (mb-url-test--fetch url t t)
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
                       (should (= (mb-url-test-response-status-code resp) 200))
