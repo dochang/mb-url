@@ -152,30 +152,36 @@ Access-Control-Allow-Credentials: true
 
 (ert-deftest mb-url-test-301-http--delete-proxy-response ()
   (mapc (lambda (case)
-          (let ((before (car case))
-                (after (cdr case)))
+          (let ((before (nth 0 case))
+                (after (nth 1 case)))
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
               (mb-url-http--delete-proxy-response)
               (should (string= (buffer-string) after)))))
-        '(("HTTP/1.1 200 Connection established\r\nProxy-Header: foo\r\n\r\nHTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n")
-          ("HTTP/1.1 200 Connection established\nProxy-Header: foo\n\nHTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
-          ("HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
+        '(("HTTP/1.1 200 Connection established\r\nProxy-Header: foo\r\n\r\nHTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n"
+           "HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n")
+          ("HTTP/1.1 200 Connection established\nProxy-Header: foo\n\nHTTP/1.1 200 OK\nHeader: bar\n\nbody...\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
+          ("HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"
+           "HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
 
 (ert-deftest mb-url-test-302-http--delete-carriage-return ()
   (mapc (lambda (case)
-          (let ((before (car case))
-                (after (cdr case)))
+          (let ((before (nth 0 case))
+                (after (nth 1 case)))
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
               (make-local-variable 'url-http-end-of-headers)
               (mb-url-http--delete-carriage-return)
               (should (string= (buffer-string) after)))))
-        '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
-          ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
-          ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"))))
+        '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
+          ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
+          ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"))))
 
 (ert-deftest mb-url-test-303-http--fix-header ()
   (mapc (lambda (case)
