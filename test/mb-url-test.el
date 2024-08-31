@@ -86,10 +86,15 @@
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
 
-(defun mb-url-test--buffer-live-p (buffer)
-  (and buffer (buffer-live-p buffer)))
+;; Sometimes HTTP clients may be dead for unknown reason.  We have to wrap
+;; `url-retrieve-synchronously'.
+(defun mb-url-test--fetch (url &optional silent inhibit-cookies timeout)
+  (let (buffer)
+    (while (null buffer)
+      (setq buffer (url-retrieve-synchronously url silent inhibit-cookies timeout)))
+    buffer))
 
-(ert-deftest mb-url-test-010-parse-response ()
+(ert-deftest mb-url-test-100-parse-response ()
   (let* ((headers "HTTP/1.1 200 OK
 Server: nginx
 Date: Wed, 02 Dec 2015 16:23:47 GMT
@@ -124,7 +129,7 @@ Access-Control-Allow-Credentials: true
         (should (equal (assoc-default 'url (mb-url-test-response-json resp))
                        "https://httpbin.org/get"))))))
 
-(ert-deftest mb-url-test-010-header-field-to-argument ()
+(ert-deftest mb-url-test-101-header-field-to-argument ()
   (mapc (lambda (case)
           (let ((field (car case))
                 (expected (cdr case)))
@@ -133,7 +138,7 @@ Access-Control-Allow-Credentials: true
           (("X-Foo2" . "") . "X-Foo2;")
           (("X-Foo3" . nil) . "X-Foo3"))))
 
-(ert-deftest mb-url-test-030-http--goto-next-body ()
+(ert-deftest mb-url-test-300-http--goto-next-body ()
   (mapc (lambda (case)
           (let ((text (nth 0 case))
                 (char (nth 1 case))
@@ -150,60 +155,62 @@ Access-Control-Allow-Credentials: true
           ("a\nb\n\nc" ?c nil)
           ("a\rb\r\rc" ?c search-failed))))
 
-(ert-deftest mb-url-test-031-http--delete-proxy-response ()
+(ert-deftest mb-url-test-301-http--delete-proxy-response ()
   (mapc (lambda (case)
-          (let ((before (car case))
-                (after (cdr case)))
+          (let ((before (nth 0 case))
+                (after (nth 1 case)))
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
               (mb-url-http--delete-proxy-response)
               (should (string= (buffer-string) after)))))
-        '(("HTTP/1.1 200 Connection established\r\nProxy-Header: foo\r\n\r\nHTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n")
-          ("HTTP/1.1 200 Connection established\nProxy-Header: foo\n\nHTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
-          ("HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
+        '(("HTTP/1.1 200 Connection established\r\nProxy-Header: foo\r\n\r\nHTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n"
+           "HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n")
+          ("HTTP/1.1 200 Connection established\nProxy-Header: foo\n\nHTTP/1.1 200 OK\nHeader: bar\n\nbody...\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
+          ("HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"
+           "HTTP/1.1 200 Connection established\rProxy-Header: foo\r\rHTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
 
-(ert-deftest mb-url-test-032-http--delete-carriage-return ()
+(ert-deftest mb-url-test-302-http--delete-carriage-return ()
   (mapc (lambda (case)
-          (let ((before (car case))
-                (after (cdr case)))
+          (let ((before (nth 0 case))
+                (after (nth 1 case)))
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
               (make-local-variable 'url-http-end-of-headers)
               (mb-url-http--delete-carriage-return)
               (should (string= (buffer-string) after)))))
-        '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
-          ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
-          ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"))))
+        '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
+          ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
+          ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"
+           "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"))))
 
-(ert-deftest mb-url-test-033-http--fix-header ()
-  (mapc (lambda (case)
-          (let ((src (car case))
-                (fixes (cdr case)))
-            (mapc (lambda (fix)
-                    (let ((header (nth 0 fix))
-                          (fn (nth 1 fix))
-                          (expected (nth 2 fix)))
-                      (with-temp-buffer
-                        (insert src)
-                        (goto-char (point-min))
-                        (mb-url-http--fix-header header fn nil nil t)
-                        (should (string= (buffer-string) expected)))))
-                  fixes)))
-        (list
-         (list "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n"
-               (list "Foo"
-                     (lambda (args) nil)
-                     "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\n\nbody...\n")
-               (list "Foo"
-                     (lambda (args) "0")
-                     "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\nFoo: 0\n\nbody...\n")
-               (list "Foo"
-                     (lambda (args) t)
-                     "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
+(ert-deftest mb-url-test-303-http--fix-header ()
+  (let ((before "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n"))
+    (mapc (lambda (fix)
+            (let ((header (nth 0 fix))
+                  (fn (nth 1 fix))
+                  (after (nth 2 fix)))
+              (with-temp-buffer
+                (insert before)
+                (goto-char (point-min))
+                (mb-url-http--fix-header header fn nil nil t)
+                (should (string= (buffer-string) after)))))
+          (list
+           (list "Foo"
+                 (lambda (args) nil)
+                 "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\n\nbody...\n")
+           (list "Foo"
+                 (lambda (args) "0")
+                 "HTTP/1.1 200 OK\nBar: 2\nBaz: 4\nFoo: 0\n\nbody...\n")
+           (list "Foo"
+                 (lambda (args) t)
+                 "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\nFoo: 3\nBaz: 4\n\nbody...\n")))))
 
-(ert-deftest mb-url-test-035-http--delete-content-encoding ()
+(ert-deftest mb-url-test-304-http--delete-content-encoding ()
   (mapc (lambda (case)
           (let ((before (car case))
                 (after (cadr case)))
@@ -221,7 +228,22 @@ Access-Control-Allow-Credentials: true
           ("HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"
            "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n"))))
 
-(ert-deftest mb-url-test-034-http--url-http-variables ()
+(ert-deftest mb-url-test-305-http--reset-end-of-headers ()
+  (mapc (lambda (case)
+          (let ((expected (nth 0 case))
+                (msg (nth 1 case)))
+            (with-temp-buffer
+              (insert msg)
+              (goto-char (point-min))
+              (make-local-variable 'url-http-end-of-headers)
+              (mb-url-http--reset-end-of-headers)
+              (should (= expected (marker-position url-http-end-of-headers))))))
+        '((31 ;; Buffer starts from 1.
+           "HTTP/1.1 200 OK\nFoo: 1\nBar: 2\n\nbody...\n")
+          (35 ;; Buffer starts from 1.
+           "HTTP/1.1 200 OK\r\nFoo: 1\r\nBar: 2\r\n\r\nbody...\n"))))
+
+(ert-deftest mb-url-test-400-http--url-http-variables ()
   (mapc (lambda (case)
           (cl-destructuring-bind
               (mime-accept-string request-noninteractive current-lastloc url-string)
@@ -243,7 +265,7 @@ Access-Control-Allow-Credentials: true
               (kill-buffer buf))))
         '(("*/*" t "http://foo/a" "http://foo/b"))))
 
-(ert-deftest mb-url-test-034-http--extra-variables ()
+(ert-deftest mb-url-test-401-http--extra-variables ()
   (mapc (lambda (case)
           (let* ((url-request-extra-headers case)
                  (url-personal-mail-address "From*")
@@ -275,17 +297,15 @@ Access-Control-Allow-Credentials: true
            ("Accept" . "text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8")
            ("Content-Length" . "42")))))
 
-(ert-deftest mb-url-test-050-http ()
+(ert-deftest mb-url-test-500-http ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend))
                   ;; GET
-                  (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix))
-                         (buffer (url-retrieve-synchronously url t t)))
-                    (should (mb-url-test--buffer-live-p buffer))
-                    (with-current-buffer buffer
+                  (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
+                    (with-current-buffer (mb-url-test--fetch url t t)
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
                              (json (mb-url-test-response-json resp)))
@@ -301,10 +321,8 @@ Access-Control-Allow-Credentials: true
                   (let* ((url (format "%s/post" mb-url-test--mockapi-prefix))
                          (url-request-method "POST")
                          (url-request-extra-headers '(("Content-Type" . "text/plain")))
-                         (url-request-data "foobar")
-                         (buffer (url-retrieve-synchronously url t t)))
-                    (should (mb-url-test--buffer-live-p buffer))
-                    (with-current-buffer buffer
+                         (url-request-data "foobar"))
+                    (with-current-buffer (mb-url-test--fetch url t t)
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
                              (json (mb-url-test-response-json resp)))
@@ -325,21 +343,19 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend)
                       (url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
-                  (should-error (url-retrieve-synchronously url t t))))
+                  (should-error (mb-url-test--fetch url t t))))
               (list 'mb-url-test--foobar
                     #'mb-url-test--foobar)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
-(ert-deftest mb-url-test-051-sentinal ()
+(ert-deftest mb-url-test-501-sentinal ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (url (format "%s/image/png" mb-url-test--mockapi-prefix))
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (should (mb-url-test--buffer-live-p buffer))
-                  (with-current-buffer buffer
+                       (url (format "%s/image/png" mb-url-test--mockapi-prefix)))
+                  (with-current-buffer (mb-url-test--fetch url t t)
                     (goto-char (point-min))
                     (let ((end-of-headers
                            (save-excursion
@@ -355,7 +371,7 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
-(ert-deftest mb-url-test-052-unibyte ()
+(ert-deftest mb-url-test-502-unibyte ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
@@ -364,10 +380,8 @@ Access-Control-Allow-Credentials: true
                        (url (format "%s/post" mb-url-test--mockapi-prefix))
                        (url-request-method "POST")
                        (url-request-extra-headers '(("Content-Type" . "text/plain; charset=utf-8")))
-                       (url-request-data "你好，世界")
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (should (mb-url-test--buffer-live-p buffer))
-                  (with-current-buffer buffer
+                       (url-request-data "你好，世界"))
+                  (with-current-buffer (mb-url-test--fetch url t t)
                     (goto-char (point-min))
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
@@ -389,17 +403,15 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie)))
     (advice-remove 'url-http 'mb-url-http-around-advice)))
 
-(ert-deftest mb-url-test-053-sentinel-zlib-unibyte ()
+(ert-deftest mb-url-test-503-sentinel-zlib-unibyte ()
   (unwind-protect
       (progn
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
                        (url (format "%s/gzip" mb-url-test--mockapi-prefix))
-                       (url-request-method "GET")
-                       (buffer (url-retrieve-synchronously url t t)))
-                  (should (mb-url-test--buffer-live-p buffer))
-                  (with-current-buffer buffer
+                       (url-request-method "GET"))
+                  (with-current-buffer (mb-url-test--fetch url t t)
                     (let* ((resp (mb-url-test-parse-response))
                            (json (mb-url-test-response-json resp)))
                       (should (= (mb-url-test-response-status-code resp) 200))
