@@ -174,10 +174,15 @@ Delete `Content-Encoding' manually."
 
 (defun mb-url-http--reset-end-of-headers ()
   "Reset url-http-end-of-headers."
-  (setq url-http-end-of-headers
-        (save-excursion
-          (goto-char (point-min))
-          (re-search-forward "\n\n" nil t))))
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^\r?\n" nil t)
+      (backward-char 1)
+      (set-marker (if (and (boundp 'url-http-end-of-headers)
+                           (markerp url-http-end-of-headers))
+                      url-http-end-of-headers
+                    (setq url-http-end-of-headers (make-marker)))
+                  (point)))))
 
 (defun mb-url-http-sentinel (proc evt)
   "Sentinel used to fix built-in sentinel.
