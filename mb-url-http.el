@@ -96,26 +96,8 @@ This function deletes the first block (from proxy)."
 (defun mb-url-http--delete-carriage-return ()
   "Delete carriage return from the header part."
   (save-excursion
-    (let* (rnrn-end-of-headers
-           nn-end-of-headers
-           end-of-headers)
-      (goto-char (point-min))
-      (setq rnrn-end-of-headers (re-search-forward "\r\n\r\n" nil t))
-      (goto-char (point-min))
-      (setq nn-end-of-headers (re-search-forward "\n\n" nil t))
-      (setq end-of-headers
-            (cond ((not nn-end-of-headers)
-                   rnrn-end-of-headers)
-                  ((not rnrn-end-of-headers)
-                   nil)
-                  ((< rnrn-end-of-headers nn-end-of-headers)
-                   rnrn-end-of-headers)))
-      (when end-of-headers
-        (save-restriction
-          (narrow-to-region (point-min) end-of-headers)
-          (goto-char (point-min))
-          (while (re-search-forward "\r\n" nil t)
-            (replace-match "\n")))))))
+    (mb-url-http--reset-end-of-headers)
+    (url-http-clean-headers)))
 
 (defun mb-url-http--fix-header (header fix-function &optional last all list)
   "Fix all HEADER lines from response message.

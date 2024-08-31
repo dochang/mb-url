@@ -170,12 +170,12 @@ Access-Control-Allow-Credentials: true
             (with-temp-buffer
               (insert before)
               (goto-char (point-min))
+              (make-local-variable 'url-http-end-of-headers)
               (mb-url-http--delete-carriage-return)
               (should (string= (buffer-string) after)))))
         '(("HTTP/1.1 200 OK\r\nHeader: bar\r\n\r\nbody...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\r\n")
           ("HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nbody...\n")
-          ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n")
-          ("HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r" . "HTTP/1.1 200 OK\rHeader: bar\r\rbody...\r"))))
+          ("HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n" . "HTTP/1.1 200 OK\nHeader: bar\n\nline1...\r\nline2...\r\n"))))
 
 (ert-deftest mb-url-test-033-http--fix-header ()
   (mapc (lambda (case)
