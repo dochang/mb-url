@@ -5,7 +5,7 @@ jobs:
     environment:
       DEFAULT_WORKSPACE: /root/project
     docker:
-      - image: oxsecurity/megalinter-go:v7
+      - image: oxsecurity/megalinter-go:v8
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
     steps:
       - checkout
