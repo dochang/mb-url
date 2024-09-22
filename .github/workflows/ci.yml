@@ -1,15 +1,19 @@
 name: CI
 on:
-  - push
-  - pull_request
-permissions:
-  issues: write
-  pull-requests: write
-  # For GitHub Comment Reporter
-  # https://megalinter.io/latest/reporters/GitHubCommentReporter/
+  push:
+  pull_request:
+    branches:
+      - main
+      - master
+permissions: read-all
 jobs:
   Mega-Linter:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      # For GitHub Comment Reporter
+      # https://megalinter.io/latest/reporters/GitHubCommentReporter/
     steps:
       - uses: actions/checkout@v4
 
