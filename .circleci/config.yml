@@ -2,14 +2,18 @@ version: 2.1
 
 jobs:
   Mega-Linter:
-    environment:
-      DEFAULT_WORKSPACE: /root/project
     docker:
       - image: oxsecurity/megalinter-go:v8
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
     steps:
       - checkout
       - run:
+          name: Setup environment variables
+          command: |
+            echo "export DEFAULT_WORKSPACE=$CIRCLE_WORKING_DIRECTORY" >> "$BASH_ENV"
+            . "$BASH_ENV"
+      - run:
+          name: Run MegaLinter
           command: |
             sh /entrypoint.sh
       - store_artifacts:
