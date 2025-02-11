@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  Mega-Linter:
+  MegaLinter:
     docker:
       - image: oxsecurity/megalinter-go:v8
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
@@ -63,7 +63,7 @@ jobs:
 workflows:
   CI:
     jobs:
-      - Mega-Linter
+      - MegaLinter
       - test:
           matrix:
             parameters:
