@@ -64,7 +64,7 @@
 ;;
 ;; As the URL package has supported HTTPS over proxies supporting CONNECT since
 ;; Emacs 26, this package is no longer recommended.  But it can still be used
-;; in Emacs < 26.
+;; in Emacs 26+.
 
 ;; Installation:
 ;;
