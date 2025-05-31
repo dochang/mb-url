@@ -4,7 +4,7 @@
 
 ### Added
 
-- Test for Emacs 29.2..29.4
+- Test for Emacs 29.2..30.1
 
 ### Changed
 
