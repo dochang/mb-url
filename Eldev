@@ -12,3 +12,5 @@
  's)
 
 (setq eldev-lint-disabled '(package))
+
+(setq eldev-project-main-file "mb-url.el")
