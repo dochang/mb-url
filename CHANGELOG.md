@@ -16,6 +16,10 @@
 
 - Support for Emacs 25 and 26
 
+### Fixed
+
+- Fix lint warnings
+
 ## [0.12.0] - 2023-08-11
 
 ### Added

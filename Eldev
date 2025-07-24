@@ -8,8 +8,6 @@
  'test
  's)
 
-(setq eldev-lint-disabled '(package))
-
 (setq eldev-project-main-file "mb-url.el")
 ;; `eldev-project-main-file' must be set before the `autoloads' plugin.
 ;; `eldev-project-main-file' can be set after other plugins.
