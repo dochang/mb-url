@@ -4,9 +4,6 @@
 (eldev-use-package-archive 'gnu)
 (eldev-use-package-archive 'melpa)
 
-;; (eldev-use-plugin 'autoloads)
-;; Do not generate *-autoloads.el.  Comment it.
-
 (eldev-add-extra-dependencies
  'test
  's)
@@ -14,3 +11,7 @@
 (setq eldev-lint-disabled '(package))
 
 (setq eldev-project-main-file "mb-url.el")
+;; `eldev-project-main-file' must be set before the `autoloads' plugin.
+;; `eldev-project-main-file' can be set after other plugins.
+
+(eldev-use-plugin 'autoloads)

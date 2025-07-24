@@ -39,3 +39,5 @@ tramp
 /Eldev-local
 
 megalinter-reports/
+
+*-autoloads.el
