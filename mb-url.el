@@ -1,10 +1,10 @@
-;;; mb-url.el --- Multiple Backends for Emacs URL package  -*- lexical-binding: t; -*-
+;;; mb-url.el --- Multiple Backends for URL package  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015, 2016, 2018, 2019, 2021-2023 ZHANG Weiyi
 
 ;; Author: ZHANG Weiyi <dochang@gmail.com>
 ;; Version: 0.12.0
-;; Package-Requires: ((emacs "25"))
+;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: comm, data, processes, hypermedia
 ;; URL: https://github.com/dochang/mb-url
 
