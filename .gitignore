@@ -41,3 +41,4 @@ tramp
 megalinter-reports/
 
 *-autoloads.el
+coverage.json

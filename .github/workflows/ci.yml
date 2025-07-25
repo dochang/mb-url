@@ -111,8 +111,8 @@ jobs:
           brew bundle install
           dockerize -wait "${MB_URL_TEST__MOCKAPI_PREFIX}" -timeout 60s
           # Waiting for mock server
-          eldev lint
-          eldev test
+          make lint
+          make test
         env:
           MB_URL_TEST__MOCKAPI_PREFIX: "http://localhost:${{ job.services.mock-server.ports['8080'] }}"
           HOMEBREW_BUNDLE_NO_LOCK: 1
