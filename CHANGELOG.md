@@ -5,6 +5,7 @@
 ### Added
 
 - Test for Emacs 29.2..30.1
+- Enable and upload coverage report
 
 ### Changed
 
