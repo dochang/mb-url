@@ -117,3 +117,10 @@ jobs:
           MB_URL_TEST__MOCKAPI_PREFIX: "http://localhost:${{ job.services.mock-server.ports['8080'] }}"
           HOMEBREW_BUNDLE_NO_LOCK: 1
         timeout-minutes: 5
+
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v5
+        with:
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
