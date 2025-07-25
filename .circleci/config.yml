@@ -5,8 +5,10 @@ jobs:
     docker:
       - image: oxsecurity/megalinter:v8
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
+
     steps:
       - checkout
+
       - run:
           name: Setup environment variables
           command: |
@@ -14,23 +16,30 @@ jobs:
             # Export `CI_JOB_URL` for MegaLinter API Reporter
             echo "export DEFAULT_WORKSPACE=$CIRCLE_WORKING_DIRECTORY" >> "$BASH_ENV"
             . "$BASH_ENV"
+
       - run:
           name: Run MegaLinter
           command: |
             sh /entrypoint.sh
+
       - store_artifacts:
           path: megalinter-reports
+
   test:
     parameters:
       emacs-version:
         type: string
+
     docker:
       - image: silex/emacs:<< parameters.emacs-version >>-ci-eldev
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
+
       - image: mccutchen/go-httpbin
         # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
+
     steps:
       - checkout
+
       - run:
           name: Install homebrew
           command: |
@@ -39,11 +48,13 @@ jobs:
             bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           environment:
             NONINTERACTIVE: 1
+
       - restore_cache:
           keys:
             - &eldev-cache-key v1-eldev-<< parameters.emacs-version >>-{{ checksum "Eldev" }}
             - v1-eldev-<< parameters.emacs-version >>-
             - v1-eldev-
+
       - run:
           name: Test
           command: |
@@ -57,6 +68,7 @@ jobs:
             MB_URL_TEST__MOCKAPI_PREFIX: "http://localhost:8080"
             HOMEBREW_BUNDLE_NO_LOCK: 1
           no_output_timeout: 5m
+
       - save_cache:
           key: *eldev-cache-key
           paths:
@@ -67,6 +79,7 @@ workflows:
     jobs:
       - MegaLinter:
           context: megalinter
+
       - test:
           matrix:
             parameters:

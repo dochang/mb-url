@@ -1,33 +1,42 @@
 name: CI
+
 on:
   push:
   pull_request:
     branches:
       - main
       - master
+
 permissions: read-all
+
 jobs:
   MegaLinter:
     runs-on: ubuntu-latest
+
     permissions:
       issues: write
       pull-requests: write
       # For GitHub Comment Reporter
       # https://megalinter.io/latest/reporters/GitHubCommentReporter/
+
     steps:
       - uses: actions/checkout@v4
 
       # MegaLinter
       - name: MegaLinter
         id: ml
+
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://megalinter.io/flavors/
         uses: oxsecurity/megalinter@v8
+
         env:
           # All available variables are described in documentation
           # https://megalinter.io/config-file/
           VALIDATE_ALL_CODEBASE: true
+
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
           # https://megalinter.io/latest/reporters/ApiReporter/
           API_REPORTER: true
           API_REPORTER_URL: ${{ secrets.API_REPORTER_URL }}
@@ -50,11 +59,13 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+
     services:
       mock-server:
         image: mccutchen/go-httpbin
         ports:
           - "8080"
+
     strategy:
       fail-fast: false
       matrix:
@@ -68,6 +79,7 @@ jobs:
           - "29.3"
           - "29.4"
           - "30.1"
+
     steps:
       - uses: actions/checkout@v4
 
