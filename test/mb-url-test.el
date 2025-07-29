@@ -33,7 +33,6 @@
 (require 'url)
 (require 'url-http)
 
-(require 's)
 (require 'promise)
 
 (require 'mb-url)
@@ -82,7 +81,7 @@
         (while (not (looking-at-p "^\n"))
           (re-search-forward "^\\([^:]*\\):\\(.*\\)\n")
           (let ((key (match-string 1))
-                (val (s-trim (match-string 2))))
+                (val (string-trim (match-string 2))))
             (setf (mb-url-test-response-headers resp)
                   (cons (cons key val) (mb-url-test-response-headers resp)))))
         (re-search-forward "^\n")

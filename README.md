@@ -53,7 +53,7 @@ in Emacs 26+.
 To install `mb-url` from git repository, clone the repo, then add the repo
 dir into `load-path`.
 
-`mb-url` has no dependencies; The test code depends on `s` and `promise`.
+`mb-url` has no dependencies; The test code depends on `promise`.
 
 ## Backends
 

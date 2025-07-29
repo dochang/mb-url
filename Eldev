@@ -8,8 +8,7 @@
 (eldev-add-extra-dependencies
  'test
  '( :package promise
-    :archives (gnu nongnu melpa-unstable))
- 's)
+    :archives (gnu nongnu melpa-unstable)))
 
 (setq eldev-project-main-file "mb-url.el")
 ;; `eldev-project-main-file' must be set before the `autoloads' plugin.
