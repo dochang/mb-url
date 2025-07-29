@@ -7,6 +7,8 @@
 
 (eldev-add-extra-dependencies
  'test
+ '( :package promise
+    :archives (gnu nongnu melpa-unstable))
  's)
 
 (setq eldev-project-main-file "mb-url.el")
@@ -14,3 +16,5 @@
 ;; `eldev-project-main-file' can be set after other plugins.
 
 (eldev-use-plugin 'autoloads)
+
+(setq eldev-emacs-required-features '(:default promise))

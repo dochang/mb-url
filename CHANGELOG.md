@@ -11,6 +11,7 @@
 - Require all HTTP clients to automatically decompress response bodies
 - Simplify Curl sentinel
 - Refactor test code
+- Run test code asynchronously
 
 ### Removed
 

@@ -34,6 +34,7 @@
 (require 'url-http)
 
 (require 's)
+(require 'promise)
 
 (require 'mb-url)
 (require 'mb-url-http)
@@ -53,6 +54,8 @@
 
 (defun mb-url-test--url (path)
   (format "%s%s" mb-url-test--mockapi-prefix (string-trim-left path "/*")))
+
+(defconst timeout-in-test 5) ; seconds
 
 (cl-defstruct (mb-url-test-response
                (:constructor mb-url-test-make-response)
@@ -92,14 +95,6 @@
           (setf (mb-url-test-response-json resp)
                 (json-read-from-string (mb-url-test-response-body resp))))))
     resp))
-
-;; Sometimes HTTP clients may be dead for unknown reason.  We have to wrap
-;; `url-retrieve-synchronously'.
-(defun mb-url-test--fetch (url &optional silent inhibit-cookies timeout)
-  (let (buffer)
-    (while (null buffer)
-      (setq buffer (url-retrieve-synchronously url silent inhibit-cookies timeout)))
-    buffer))
 
 (ert-deftest mb-url-test-100-parse-response ()
   (let* ((headers "HTTP/1.1 200 OK
@@ -305,131 +300,194 @@ Access-Control-Allow-Credentials: true
            ("Content-Length" . "42")))))
 
 (ert-deftest mb-url-test-500-http ()
-  (unwind-protect
-      (progn
-        (advice-add 'url-http :around 'mb-url-http-around-advice)
-        (mapc (lambda (backend)
-                (let ((mb-url-http-backend backend))
-                  ;; GET
-                  (let* ((url (mb-url-test--url "/get?foo=bar")))
-                    (with-current-buffer (mb-url-test--fetch url t t)
-                      (goto-char (point-min))
-                      (let* ((resp (mb-url-test-parse-response))
-                             (json (mb-url-test-response-json resp)))
-                        (should (= (mb-url-test-response-status-code resp) 200))
-                        (should (equal
-                                 (car (mail-header-parse-content-type
-                                       (mb-url-test-response-header "Content-Type" resp)))
-                                 "application/json"))
-                        (should (equal
-                                 (aref (assoc-default 'foo (assoc-default 'args json)) 0)
-                                 "bar")))))
-                  ;; POST with request data
-                  (let* ((url (mb-url-test--url "/post"))
-                         (url-request-method "POST")
-                         (url-request-extra-headers '(("Content-Type" . "text/plain")))
-                         (url-request-data "foobar"))
-                    (with-current-buffer (mb-url-test--fetch url t t)
-                      (goto-char (point-min))
-                      (let* ((resp (mb-url-test-parse-response))
-                             (json (mb-url-test-response-json resp)))
-                        (should (= (mb-url-test-response-status-code resp) 200))
-                        (should (equal
-                                 (car (mail-header-parse-content-type
-                                       (mb-url-test-response-header "Content-Type" resp)))
-                                 "application/json"))
-                        (should (equal
-                                 (car (mail-header-parse-content-type
-                                       (aref (assoc-default 'Content-Type (assoc-default 'headers json)) 0)))
-                                 "text/plain"))
-                        (should (equal (assoc-default 'data json) url-request-data)))))))
-              (list 'mb-url-http-curl
-                    #'mb-url-http-curl
-                    'mb-url-http-httpie
-                    #'mb-url-http-httpie))
-        (mapc (lambda (backend)
-                (let ((mb-url-http-backend backend)
-                      (url (mb-url-test--url "/get?foo=bar")))
-                  (should-error (mb-url-test--fetch url t t))))
-              (list 'mb-url-test--foobar
-                    #'mb-url-test--foobar)))
-    (advice-remove 'url-http 'mb-url-http-around-advice)))
+  (let ((get-fetch
+         (lambda (resolve)
+           (let ((url (mb-url-test--url "/get?foo=bar")))
+             (url-retrieve
+              url
+              (lambda (status)
+                (goto-char (point-min))
+                (let* ((resp (mb-url-test-parse-response))
+                       (json (mb-url-test-response-json resp)))
+                  (should (= (mb-url-test-response-status-code resp) 200))
+                  (should (equal
+                           (car (mail-header-parse-content-type
+                                 (mb-url-test-response-header "Content-Type" resp)))
+                           "application/json"))
+                  (should (equal
+                           (aref (assoc-default 'foo (assoc-default 'args json)) 0)
+                           "bar")))
+                (funcall resolve))))))
+        (post-fetch
+         (lambda (resolve)
+           (let* ((url (mb-url-test--url "/post"))
+                  (data "foobar")
+                  (url-request-method "POST")
+                  (url-request-extra-headers '(("Content-Type" . "text/plain")))
+                  (url-request-data data))
+             (url-retrieve
+              url
+              (lambda (status)
+                (goto-char (point-min))
+                (let* ((resp (mb-url-test-parse-response))
+                       (json (mb-url-test-response-json resp)))
+                  (should (= (mb-url-test-response-status-code resp) 200))
+                  (should (equal
+                           (car (mail-header-parse-content-type
+                                 (mb-url-test-response-header "Content-Type" resp)))
+                           "application/json"))
+                  (should (equal
+                           (car (mail-header-parse-content-type
+                                 (aref (assoc-default 'Content-Type (assoc-default 'headers json)) 0)))
+                           "text/plain"))
+                  (should (equal (assoc-default 'data json) data)))
+                (funcall resolve)))))))
+    (unwind-protect
+        (progn
+          (advice-add 'url-http :around 'mb-url-http-around-advice)
+          (promise-wait-value
+           (promise-wait
+               timeout-in-test
+             (promise-all
+              (mapcar
+               (lambda (backend)
+                 (let ((mb-url-http-backend backend))
+                   (promise-all
+                    (list
+                     ;; GET
+                     (promise-new
+                      (lambda (resolve _)
+                        (funcall get-fetch resolve)))
+                     ;; POST
+                     (promise-new
+                      (lambda (resolve _)
+                        (funcall post-fetch resolve)))))))
+               (list 'mb-url-http-curl
+                     #'mb-url-http-curl
+                     'mb-url-http-httpie
+                     #'mb-url-http-httpie)))))
+          (mapc
+           (lambda (backend)
+             (let ((mb-url-http-backend backend)
+                   (url (mb-url-test--url "/get?foo=bar")))
+               (should-error (url-retrieve url #'ignore) :type '(void-function))))
+           (list 'mb-url-test--foobar
+                 #'mb-url-test--foobar)))
+      (advice-remove 'url-http 'mb-url-http-around-advice))))
 
 (ert-deftest mb-url-test-501-sentinal ()
-  (unwind-protect
-      (progn
-        (advice-add 'url-http :around 'mb-url-http-around-advice)
-        (mapc (lambda (backend)
-                (let* ((mb-url-http-backend backend)
-                       (url (mb-url-test--url "/image/png")))
-                  (with-current-buffer (mb-url-test--fetch url t t)
-                    (goto-char (point-min))
-                    (let ((end-of-headers
-                           (save-excursion
-                             (goto-char (point-min))
-                             (re-search-forward "\n\n" nil t))))
-                      (should
-                       (string=
-                        (buffer-substring end-of-headers (+ end-of-headers 8))
-                        (unibyte-string #x89 #x50 #x4e #x47 #x0d #x0a #x1a #x0a)))))))
-              (list 'mb-url-http-curl
-                    #'mb-url-http-curl
-                    'mb-url-http-httpie
-                    #'mb-url-http-httpie)))
-    (advice-remove 'url-http 'mb-url-http-around-advice)))
+  (let ((fetch
+         (lambda (resolve)
+           (let ((url (mb-url-test--url "/image/png")))
+             (url-retrieve
+              url
+              (lambda (status)
+                (goto-char (point-min))
+                (let ((end-of-headers
+                       (save-excursion
+                         (goto-char (point-min))
+                         (re-search-forward "\n\n" nil t))))
+                  (should
+                   (string=
+                    (buffer-substring end-of-headers (+ end-of-headers 8))
+                    (unibyte-string #x89 #x50 #x4e #x47 #x0d #x0a #x1a #x0a))))
+                (funcall resolve)))))))
+    (unwind-protect
+        (progn
+          (advice-add 'url-http :around 'mb-url-http-around-advice)
+          (promise-wait-value
+           (promise-wait
+               timeout-in-test
+             (promise-all
+              (mapcar
+               (lambda (backend)
+                 (let ((mb-url-http-backend backend))
+                   (promise-new
+                    (lambda (resolve _)
+                      (funcall fetch resolve)))))
+               (list 'mb-url-http-curl
+                     #'mb-url-http-curl
+                     'mb-url-http-httpie
+                     #'mb-url-http-httpie))))))
+      (advice-remove 'url-http 'mb-url-http-around-advice))))
 
 (ert-deftest mb-url-test-502-unibyte ()
-  (unwind-protect
-      (progn
-        (advice-add 'url-http :around 'mb-url-http-around-advice)
-        (mapc (lambda (backend)
-                (let* ((mb-url-http-backend backend)
-                       (url (mb-url-test--url "/post"))
-                       (url-request-method "POST")
-                       (url-request-extra-headers '(("Content-Type" . "text/plain; charset=utf-8")))
-                       (url-request-data "你好，世界"))
-                  (with-current-buffer (mb-url-test--fetch url t t)
-                    (goto-char (point-min))
-                    (let* ((resp (mb-url-test-parse-response))
-                           (json (mb-url-test-response-json resp)))
-                      (should (= (mb-url-test-response-status-code resp) 200))
-                      (should (equal
-                               (car (mail-header-parse-content-type
-                                     (mb-url-test-response-header "Content-Type" resp)))
-                               "application/json"))
-                      (should (equal
-                               (car (mail-header-parse-content-type
-                                     (aref (assoc-default 'Content-Type (assoc-default 'headers json)) 0)))
-                               "text/plain"))
-                      (should (equal
-                               (decode-coding-string (assoc-default 'data json) 'utf-8)
-                               url-request-data))))))
-              (list 'mb-url-http-curl
-                    #'mb-url-http-curl
-                    'mb-url-http-httpie
-                    #'mb-url-http-httpie)))
-    (advice-remove 'url-http 'mb-url-http-around-advice)))
+  (let ((fetch
+         (lambda (resolve)
+           (let* ((url (mb-url-test--url "/post"))
+                  (data "你好，世界")
+                  (url-request-method "POST")
+                  (url-request-extra-headers '(("Content-Type" . "text/plain; charset=utf-8")))
+                  (url-request-data data))
+             (url-retrieve
+              url
+              (lambda (status)
+                (goto-char (point-min))
+                (let* ((resp (mb-url-test-parse-response))
+                       (json (mb-url-test-response-json resp)))
+                  (should (= (mb-url-test-response-status-code resp) 200))
+                  (should (equal
+                           (car (mail-header-parse-content-type
+                                 (mb-url-test-response-header "Content-Type" resp)))
+                           "application/json"))
+                  (should (equal
+                           (car (mail-header-parse-content-type
+                                 (aref (assoc-default 'Content-Type (assoc-default 'headers json)) 0)))
+                           "text/plain"))
+                  (should (equal data (decode-coding-string (assoc-default 'data json) 'utf-8))))
+                (funcall resolve)))))))
+    (unwind-protect
+        (progn
+          (advice-add 'url-http :around 'mb-url-http-around-advice)
+          (promise-wait-value
+           (promise-wait
+               timeout-in-test
+             (promise-all
+              (mapcar
+               (lambda (backend)
+                 (let ((mb-url-http-backend backend))
+                   (promise-new
+                    (lambda (resolve _)
+                      (funcall fetch resolve)))))
+               (list 'mb-url-http-curl
+                     #'mb-url-http-curl
+                     'mb-url-http-httpie
+                     #'mb-url-http-httpie))))))
+      (advice-remove 'url-http 'mb-url-http-around-advice))))
 
 (ert-deftest mb-url-test-503-sentinel-zlib-unibyte ()
-  (unwind-protect
-      (progn
-        (advice-add 'url-http :around 'mb-url-http-around-advice)
-        (mapc (lambda (backend)
-                (let* ((mb-url-http-backend backend)
-                       (url (mb-url-test--url "/gzip"))
-                       (url-request-method "GET"))
-                  (with-current-buffer (mb-url-test--fetch url t t)
-                    (let* ((resp (mb-url-test-parse-response))
-                           (json (mb-url-test-response-json resp)))
-                      (should (= (mb-url-test-response-status-code resp) 200))
-                      (should (null (mb-url-test-response-header "Content-Encoding" resp)))
-                      (should (assoc-default 'gzipped json))))))
-              (list
-               'mb-url-http-curl
-               #'mb-url-http-curl
-               'mb-url-http-httpie
-               #'mb-url-http-httpie)))
-    (advice-remove 'url-http 'mb-url-http-around-advice)))
+  (let ((fetch
+         (lambda (resolve)
+           (let ((url (mb-url-test--url "/gzip"))
+                 (url-request-method "GET"))
+             (url-retrieve
+              url
+              (lambda (status)
+                (goto-char (point-min))
+                (let* ((resp (mb-url-test-parse-response))
+                       (json (mb-url-test-response-json resp)))
+                  (should (= (mb-url-test-response-status-code resp) 200))
+                  (should (null (mb-url-test-response-header "Content-Encoding" resp)))
+                  (should (assoc-default 'gzipped json)))
+                (funcall resolve)))))))
+    (unwind-protect
+        (progn
+          (advice-add 'url-http :around 'mb-url-http-around-advice)
+          (promise-wait-value
+           (promise-wait
+               timeout-in-test
+             (promise-all
+              (mapcar
+               (lambda (backend)
+                 (let ((mb-url-http-backend backend))
+                   (promise-new
+                    (lambda (resolve _)
+                      (funcall fetch resolve)))))
+               (list 'mb-url-http-curl
+                     #'mb-url-http-curl
+                     'mb-url-http-httpie
+                     #'mb-url-http-httpie))))))
+      (advice-remove 'url-http 'mb-url-http-around-advice))))
 
 (provide 'mb-url-test)
 

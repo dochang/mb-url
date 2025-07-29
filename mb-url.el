@@ -76,7 +76,7 @@
 ;; To install `mb-url' from git repository, clone the repo, then add the repo
 ;; dir into `load-path'.
 ;;
-;; `mb-url' has no dependencies; The test code depends on `s'.
+;; `mb-url' has no dependencies; The test code depends on `s' and `promise'.
 
 ;; Backends:
 ;;
