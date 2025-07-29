@@ -1,4 +1,4 @@
-# mb-url - Multiple Backends for Emacs URL package
+# mb-url - Multiple Backends for URL package
 
 *Author:* ZHANG Weiyi <dochang@gmail.com><br>
 *Version:* 0.12.0<br>
@@ -53,7 +53,7 @@ in Emacs 26+.
 To install `mb-url` from git repository, clone the repo, then add the repo
 dir into `load-path`.
 
-`mb-url` depends on `cl-lib`;  The test code also depends on `s`.
+`mb-url` has no dependencies; The test code depends on `s`.
 
 ## Backends
 

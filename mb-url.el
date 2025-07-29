@@ -76,7 +76,7 @@
 ;; To install `mb-url' from git repository, clone the repo, then add the repo
 ;; dir into `load-path'.
 ;;
-;; `mb-url' depends on `cl-lib';  The test code also depends on `s'.
+;; `mb-url' has no dependencies; The test code depends on `s'.
 
 ;; Backends:
 ;;
@@ -161,18 +161,10 @@
 
 ;;; Code:
 
-(require 'cl-lib)
-
 (defgroup mb-url ()
   "Multiple Backends for URL package."
   :prefix "mb-url-"
   :group 'url)
-
-(defmacro mb-url-with-gensyms (symbols &rest body)
-  "Bind SYMBOLS to unique temporary symbols then execute BODY in the context."
-  (declare (indent 1))
-  `(let ,(mapcar (lambda (sym) `(,sym (cl-gensym))) symbols)
-     ,@body))
 
 (defun mb-url-string-empty-p (string)
   "Check whether STRING is nil or empty."
