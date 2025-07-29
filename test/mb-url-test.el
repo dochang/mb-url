@@ -41,11 +41,18 @@
 ;; Do not truncate the backtrace.  This makes ERT easy to debug.
 (setq ert-batch-backtrace-right-margin 256)
 
-(setq mb-url-test--mockapi-prefix
-      (let ((prefix (getenv "MB_URL_TEST__MOCKAPI_PREFIX")))
-        (if (mb-url-string-empty-p prefix)
-            "https://httpbingo.org"
-          prefix)))
+(defconst mb-url-test--mockapi-prefix
+  (concat
+   (string-trim-right
+    (let ((prefix (getenv "MB_URL_TEST__MOCKAPI_PREFIX")))
+      (if (mb-url-string-empty-p prefix)
+          "https://httpbingo.org"
+        prefix))
+    "/*")
+   "/"))
+
+(defun mb-url-test--url (path)
+  (format "%s%s" mb-url-test--mockapi-prefix (string-trim-left path "/*")))
 
 (cl-defstruct (mb-url-test-response
                (:constructor mb-url-test-make-response)
@@ -304,7 +311,7 @@ Access-Control-Allow-Credentials: true
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend))
                   ;; GET
-                  (let* ((url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
+                  (let* ((url (mb-url-test--url "/get?foo=bar")))
                     (with-current-buffer (mb-url-test--fetch url t t)
                       (goto-char (point-min))
                       (let* ((resp (mb-url-test-parse-response))
@@ -318,7 +325,7 @@ Access-Control-Allow-Credentials: true
                                  (aref (assoc-default 'foo (assoc-default 'args json)) 0)
                                  "bar")))))
                   ;; POST with request data
-                  (let* ((url (format "%s/post" mb-url-test--mockapi-prefix))
+                  (let* ((url (mb-url-test--url "/post"))
                          (url-request-method "POST")
                          (url-request-extra-headers '(("Content-Type" . "text/plain")))
                          (url-request-data "foobar"))
@@ -342,7 +349,7 @@ Access-Control-Allow-Credentials: true
                     #'mb-url-http-httpie))
         (mapc (lambda (backend)
                 (let ((mb-url-http-backend backend)
-                      (url (format "%s/get?foo=bar" mb-url-test--mockapi-prefix)))
+                      (url (mb-url-test--url "/get?foo=bar")))
                   (should-error (mb-url-test--fetch url t t))))
               (list 'mb-url-test--foobar
                     #'mb-url-test--foobar)))
@@ -354,7 +361,7 @@ Access-Control-Allow-Credentials: true
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (url (format "%s/image/png" mb-url-test--mockapi-prefix)))
+                       (url (mb-url-test--url "/image/png")))
                   (with-current-buffer (mb-url-test--fetch url t t)
                     (goto-char (point-min))
                     (let ((end-of-headers
@@ -377,7 +384,7 @@ Access-Control-Allow-Credentials: true
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (url (format "%s/post" mb-url-test--mockapi-prefix))
+                       (url (mb-url-test--url "/post"))
                        (url-request-method "POST")
                        (url-request-extra-headers '(("Content-Type" . "text/plain; charset=utf-8")))
                        (url-request-data "你好，世界"))
@@ -409,7 +416,7 @@ Access-Control-Allow-Credentials: true
         (advice-add 'url-http :around 'mb-url-http-around-advice)
         (mapc (lambda (backend)
                 (let* ((mb-url-http-backend backend)
-                       (url (format "%s/gzip" mb-url-test--mockapi-prefix))
+                       (url (mb-url-test--url "/gzip"))
                        (url-request-method "GET"))
                   (with-current-buffer (mb-url-test--fetch url t t)
                     (let* ((resp (mb-url-test-parse-response))
