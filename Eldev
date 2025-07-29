@@ -15,5 +15,6 @@
 ;; `eldev-project-main-file' can be set after other plugins.
 
 (eldev-use-plugin 'autoloads)
+(eldev-use-plugin 'undercover)
 
 (setq eldev-emacs-required-features '(:default promise))
