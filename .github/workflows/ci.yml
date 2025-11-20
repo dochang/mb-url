@@ -15,7 +15,7 @@ jobs:
       # For GitHub Comment Reporter
       # https://megalinter.io/latest/reporters/GitHubCommentReporter/
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # MegaLinter
       - name: MegaLinter
@@ -69,7 +69,7 @@ jobs:
           - "29.4"
           - "30.1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Homebrew
         id: set-up-homebrew
